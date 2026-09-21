@@ -3,6 +3,7 @@ const MEMO_PREFERENCES_KEY = "rongbaram-land:memo-preferences-v1";
 const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 48;
 const DEFAULT_FONT_SIZE = 16;
+const MEMO_INDENT = "    ";
 const FONT_FAMILIES = {
   "noto-sans": '"Noto Sans KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "nanum-gothic": '"Nanum Gothic", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
@@ -109,10 +110,20 @@ function saveMemo() {
 memoEditor.addEventListener("input", saveMemo);
 
 memoEditor.addEventListener("keydown", (event) => {
-  if (event.key !== "Tab" || event.shiftKey) return;
-  event.preventDefault();
+  if (event.key === "Tab" && !event.shiftKey) {
+    event.preventDefault();
+    const cursorPosition = memoEditor.selectionStart;
+    memoEditor.setRangeText(MEMO_INDENT, cursorPosition, cursorPosition, "end");
+    saveMemo();
+    return;
+  }
+
+  if (event.key !== "Backspace" || memoEditor.selectionStart !== memoEditor.selectionEnd) return;
   const cursorPosition = memoEditor.selectionStart;
-  memoEditor.setRangeText("    ", cursorPosition, cursorPosition, "end");
+  const precedingText = memoEditor.value.slice(cursorPosition - MEMO_INDENT.length, cursorPosition);
+  if (precedingText !== MEMO_INDENT) return;
+  event.preventDefault();
+  memoEditor.setRangeText("", cursorPosition - MEMO_INDENT.length, cursorPosition, "end");
   saveMemo();
 });
 
