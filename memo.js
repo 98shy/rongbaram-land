@@ -37,6 +37,8 @@ const memoSymbolToggle = document.querySelector("#memoSymbolToggle");
 const memoSymbolPalette = document.querySelector("#memoSymbolPalette");
 
 let preferences = readPreferences();
+let isMemoComposing = false;
+let pendingIndent = false;
 
 function readPreferences() {
   try {
@@ -107,17 +109,37 @@ function saveMemo() {
   updateCharacterCount();
 }
 
+function insertMemoIndent() {
+  const cursorPosition = memoEditor.selectionStart;
+  memoEditor.setRangeText(MEMO_INDENT, cursorPosition, cursorPosition, "end");
+  saveMemo();
+}
+
 memoEditor.addEventListener("input", saveMemo);
+
+memoEditor.addEventListener("compositionstart", () => {
+  isMemoComposing = true;
+});
+
+memoEditor.addEventListener("compositionend", () => {
+  isMemoComposing = false;
+  if (!pendingIndent) return;
+  pendingIndent = false;
+  requestAnimationFrame(insertMemoIndent);
+});
 
 memoEditor.addEventListener("keydown", (event) => {
   if (event.key === "Tab" && !event.shiftKey) {
     event.preventDefault();
-    const cursorPosition = memoEditor.selectionStart;
-    memoEditor.setRangeText(MEMO_INDENT, cursorPosition, cursorPosition, "end");
-    saveMemo();
+    if (event.isComposing || isMemoComposing) {
+      pendingIndent = true;
+      return;
+    }
+    insertMemoIndent();
     return;
   }
 
+  if (event.isComposing || isMemoComposing) return;
   if (event.key !== "Backspace" || memoEditor.selectionStart !== memoEditor.selectionEnd) return;
   const cursorPosition = memoEditor.selectionStart;
   const precedingText = memoEditor.value.slice(cursorPosition - MEMO_INDENT.length, cursorPosition);
