@@ -19,11 +19,7 @@ const FONT_FAMILIES = {
   "single-day": '"Single Day", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "yeon-sung": '"Yeon Sung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   stylish: '"Stylish", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
-  "black-and-white-picture": '"Black And White Picture", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "black-han-sans": '"Black Han Sans", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
-  gugi: '"Gugi", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
-  "kirang-haerang": '"Kirang Haerang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
-  "east-sea-dokdo": '"East Sea Dokdo", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "song-myung": '"Song Myung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
   "gowun-batang": '"Gowun Batang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
 };
