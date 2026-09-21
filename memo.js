@@ -5,14 +5,12 @@ const MAX_FONT_SIZE = 32;
 const DEFAULT_FONT_SIZE = 16;
 const FONT_FAMILIES = {
   "noto-sans": '"Noto Sans KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
-  "noto-serif": '"Noto Serif KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
   "nanum-gothic": '"Nanum Gothic", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "nanum-myeongjo": '"Nanum Myeongjo", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
   "gowun-dodum": '"Gowun Dodum", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   jua: '"Jua", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "do-hyeon": '"Do Hyeon", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "gamja-flower": '"Gamja Flower", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
-  "cute-font": '"Cute Font", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   gaegu: '"Gaegu", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "hi-melody": '"Hi Melody", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "nanum-pen": '"Nanum Pen Script", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
@@ -20,13 +18,13 @@ const FONT_FAMILIES = {
   dongle: '"Dongle", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "single-day": '"Single Day", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "yeon-sung": '"Yeon Sung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
-  "bagel-fat-one": '"Bagel Fat One", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  stylish: '"Stylish", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "black-and-white-picture": '"Black And White Picture", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "black-han-sans": '"Black Han Sans", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   gugi: '"Gugi", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "kirang-haerang": '"Kirang Haerang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "east-sea-dokdo": '"East Sea Dokdo", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "song-myung": '"Song Myung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
-  "grandiflora-one": '"Grandiflora One", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
   "gowun-batang": '"Gowun Batang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
 };
 
