@@ -4,14 +4,23 @@ const MIN_FONT_SIZE = 12;
 const MAX_FONT_SIZE = 32;
 const DEFAULT_FONT_SIZE = 16;
 const FONT_FAMILIES = {
-  "noto-sans": '"Noto Sans KR", sans-serif',
-  "noto-serif": '"Noto Serif KR", serif',
-  "nanum-gothic": '"Nanum Gothic", sans-serif',
-  "nanum-myeongjo": '"Nanum Myeongjo", serif',
-  "gowun-dodum": '"Gowun Dodum", sans-serif',
-  jua: '"Jua", sans-serif',
-  "do-hyeon": '"Do Hyeon", sans-serif',
-  "gamja-flower": '"Gamja Flower", cursive',
+  "noto-sans": '"Noto Sans KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "noto-serif": '"Noto Serif KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
+  "nanum-gothic": '"Nanum Gothic", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "nanum-myeongjo": '"Nanum Myeongjo", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
+  "gowun-dodum": '"Gowun Dodum", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  jua: '"Jua", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "do-hyeon": '"Do Hyeon", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "gamja-flower": '"Gamja Flower", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "cute-font": '"Cute Font", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  gaegu: '"Gaegu", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "hi-melody": '"Hi Melody", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "nanum-pen": '"Nanum Pen Script", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "nanum-brush": '"Nanum Brush Script", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "poor-story": '"Poor Story", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  dongle: '"Dongle", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "single-day": '"Single Day", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "yeon-sung": '"Yeon Sung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
 };
 
 const memoEditor = document.querySelector("#memoEditor");
@@ -22,6 +31,8 @@ const memoFontFamily = document.querySelector("#memoFontFamily");
 const memoFontSmaller = document.querySelector("#memoFontSmaller");
 const memoFontLarger = document.querySelector("#memoFontLarger");
 const memoFontSize = document.querySelector("#memoFontSize");
+const memoSymbolToggle = document.querySelector("#memoSymbolToggle");
+const memoSymbolPalette = document.querySelector("#memoSymbolPalette");
 
 let preferences = readPreferences();
 
@@ -104,6 +115,29 @@ memoFontFamily.addEventListener("change", () => {
 
 memoFontSmaller.addEventListener("click", () => updateFontSize(-1));
 memoFontLarger.addEventListener("click", () => updateFontSize(1));
+
+memoSymbolToggle.addEventListener("click", () => {
+  const willOpen = memoSymbolPalette.hidden;
+  memoSymbolPalette.hidden = !willOpen;
+  memoSymbolToggle.setAttribute("aria-expanded", String(willOpen));
+});
+
+memoSymbolPalette.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-symbol]");
+  if (!button) return;
+  const start = memoEditor.selectionStart;
+  const end = memoEditor.selectionEnd;
+  memoEditor.setRangeText(button.dataset.symbol, start, end, "end");
+  saveMemo();
+  memoEditor.focus();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || memoSymbolPalette.hidden) return;
+  memoSymbolPalette.hidden = true;
+  memoSymbolToggle.setAttribute("aria-expanded", "false");
+  memoSymbolToggle.focus();
+});
 
 memoClearButton.addEventListener("click", () => {
   if (!memoEditor.value) return;
