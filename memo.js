@@ -20,6 +20,14 @@ const FONT_FAMILIES = {
   dongle: '"Dongle", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "single-day": '"Single Day", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "yeon-sung": '"Yeon Sung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "bagel-fat-one": '"Bagel Fat One", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "black-han-sans": '"Black Han Sans", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  gugi: '"Gugi", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
+  "kirang-haerang": '"Kirang Haerang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "east-sea-dokdo": '"East Sea Dokdo", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
+  "song-myung": '"Song Myung", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
+  "grandiflora-one": '"Grandiflora One", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
+  "gowun-batang": '"Gowun Batang", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", serif',
 };
 
 const memoEditor = document.querySelector("#memoEditor");
