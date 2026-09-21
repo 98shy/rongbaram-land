@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&family=Oswald:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gamja+Flower&family=Gowun+Dodum&family=Jua&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@400;600&family=Oswald:wght@500;600&display=swap');
 
 :root {
   --ink: #172027;
@@ -337,7 +337,22 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 .memo-card__label { color: var(--ink); font-size: 13px; font-weight: 800; }
 .memo-save-status { color: var(--teal); font-size: 11px; font-weight: 700; }
 .memo-save-status.is-error { color: var(--danger); }
+.memo-format-toolbar { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 12px; padding: 11px 12px; background: #eeeae1; border: 1px solid #d8d2c6; }
+.memo-font-control,
+.memo-size-control { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.memo-font-control select { height: 34px; min-width: 150px; padding: 0 30px 0 10px; color: var(--ink); background: var(--surface); border: 1px solid #c9c2b5; border-radius: 2px; cursor: pointer; font-size: 12px; outline: none; }
+.memo-font-control select:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(200, 150, 55, .13); }
+.memo-size-control { margin-left: auto; }
+.memo-size-control > div { display: grid; grid-template-columns: 34px 58px 34px; align-items: center; }
+.memo-size-control button { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; color: #fff; background: var(--navy); border: 0; cursor: pointer; font-size: 18px; font-weight: 800; }
+.memo-size-control button:hover:not(:disabled),
+.memo-size-control button:focus-visible:not(:disabled) { color: var(--navy); background: var(--gold-bright); outline: none; }
+.memo-size-control button:disabled { color: #8a9296; background: #d1d0ca; cursor: default; }
+.memo-size-control strong { height: 34px; color: var(--ink); background: var(--surface); border-block: 1px solid #c9c2b5; text-align: center; font: 600 12px/32px "Noto Sans KR", sans-serif; }
 .memo-editor {
+  --memo-font-family: "Noto Sans KR", sans-serif;
+  --memo-font-size: 16px;
+  --memo-line-height: 32px;
   display: block;
   width: 100%;
   min-height: 460px;
@@ -345,12 +360,14 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
   padding: 20px;
   color: var(--ink);
   background:
-    repeating-linear-gradient(to bottom, transparent 0, transparent 31px, rgba(104, 116, 123, .13) 32px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--memo-line-height) - 1px), rgba(104, 116, 123, .13) var(--memo-line-height)),
     var(--surface);
   border: 1px solid #cec8bc;
   border-radius: 2px;
   outline: none;
-  line-height: 32px;
+  font-family: var(--memo-font-family);
+  font-size: var(--memo-font-size);
+  line-height: var(--memo-line-height);
   transition: border-color 160ms, box-shadow 160ms;
 }
 .memo-editor:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200, 150, 55, .13); }
@@ -387,6 +404,10 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
   .memo-page__shell { width: min(100% - 28px, 920px); padding: 14px 0; }
   .memo-page__header { align-items: flex-start; flex-direction: column; gap: 16px; padding: 20px; }
   .memo-card { padding: 15px; }
+  .memo-format-toolbar { align-items: stretch; flex-direction: column; }
+  .memo-font-control,
+  .memo-size-control { justify-content: space-between; width: 100%; margin-left: 0; }
+  .memo-font-control select { min-width: 0; width: 178px; }
   .memo-editor { min-height: calc(100vh - 330px); padding: 14px; }
 }
 
