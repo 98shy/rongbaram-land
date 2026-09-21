@@ -16,7 +16,6 @@ const FONT_FAMILIES = {
   gaegu: '"Gaegu", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "hi-melody": '"Hi Melody", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "nanum-pen": '"Nanum Pen Script", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
-  "nanum-brush": '"Nanum Brush Script", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   "poor-story": '"Poor Story", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',
   dongle: '"Dongle", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
   "single-day": '"Single Day", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", cursive',

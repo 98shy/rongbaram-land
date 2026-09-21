@@ -6,8 +6,8 @@
     <meta name="description" content="룽바람 랜드에서 사용하는 개인 메모장" />
     <title>룽바람 메모장 | Rongbraram Land</title>
     <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=17" />
-    <script src="memo.js?v=3" defer></script>
+    <link rel="stylesheet" href="styles.css?v=18" />
+    <script src="memo.js?v=4" defer></script>
   </head>
   <body class="memo-page">
     <main class="memo-page__shell">
@@ -40,25 +40,16 @@
               <option value="jua">주아</option>
               <option value="do-hyeon">도현</option>
               <option value="gamja-flower">감자꽃</option>
-              <option value="cute-font">귀여운 글씨 · 첨부 이미지와 유사</option>
+              <option value="cute-font">Cute Font</option>
               <option value="gaegu">개구</option>
               <option value="hi-melody">하이멜로디</option>
               <option value="nanum-pen">나눔손글씨 펜</option>
-              <option value="nanum-brush">나눔손글씨 붓</option>
               <option value="poor-story">푸어스토리</option>
               <option value="dongle">동글</option>
               <option value="single-day">싱글데이</option>
               <option value="yeon-sung">연성</option>
             </select>
           </label>
-          <div class="memo-size-control" aria-label="메모 글씨 크기 조절">
-            <span>글씨 크기</span>
-            <div>
-              <button id="memoFontSmaller" type="button" aria-label="글씨 크기 1픽셀 줄이기">−</button>
-              <strong id="memoFontSize" aria-live="polite">16px</strong>
-              <button id="memoFontLarger" type="button" aria-label="글씨 크기 1픽셀 늘리기">+</button>
-            </div>
-          </div>
           <button
             id="memoSymbolToggle"
             class="memo-symbol-toggle"
@@ -69,39 +60,45 @@
             <span aria-hidden="true">♡</span>
             문자표
           </button>
-        </div>
-        <div id="memoSymbolPalette" class="memo-symbol-palette" hidden>
-          <div class="memo-symbol-group">
-            <strong>색깔 하트</strong>
+          <div class="memo-size-control" aria-label="메모 글씨 크기 조절">
+            <span>글씨 크기</span>
             <div>
-              <button type="button" data-symbol="❤️" aria-label="빨간색 하트">❤️</button>
-              <button type="button" data-symbol="🧡" aria-label="주황색 하트">🧡</button>
-              <button type="button" data-symbol="💛" aria-label="노란색 하트">💛</button>
-              <button type="button" data-symbol="💚" aria-label="초록색 하트">💚</button>
-              <button type="button" data-symbol="💙" aria-label="파란색 하트">💙</button>
-              <button type="button" data-symbol="💜" aria-label="보라색 하트">💜</button>
-              <button type="button" data-symbol="🤎" aria-label="갈색 하트">🤎</button>
-              <button type="button" data-symbol="🖤" aria-label="검은색 하트">🖤</button>
-              <button type="button" data-symbol="🤍" aria-label="흰색 하트">🤍</button>
-              <button type="button" data-symbol="🩷" aria-label="분홍색 하트">🩷</button>
-              <button type="button" data-symbol="🩵" aria-label="하늘색 하트">🩵</button>
-              <button type="button" data-symbol="💖" aria-label="반짝이는 하트">💖</button>
+              <button id="memoFontSmaller" type="button" aria-label="글씨 크기 1픽셀 줄이기">−</button>
+              <strong id="memoFontSize" aria-live="polite">16px</strong>
+              <button id="memoFontLarger" type="button" aria-label="글씨 크기 1픽셀 늘리기">+</button>
             </div>
           </div>
-          <div class="memo-symbol-group">
-            <strong>별·장식</strong>
-            <div>
-              <button type="button" data-symbol="⭐" aria-label="노란 별">⭐</button>
-              <button type="button" data-symbol="🌟" aria-label="빛나는 별">🌟</button>
-              <button type="button" data-symbol="✨" aria-label="반짝임">✨</button>
-              <button type="button" data-symbol="💫" aria-label="회전하는 별">💫</button>
-              <button type="button" data-symbol="★" aria-label="검은 별">★</button>
-              <button type="button" data-symbol="☆" aria-label="빈 별">☆</button>
-              <button type="button" data-symbol="✦" aria-label="네 꼭지 별">✦</button>
-              <button type="button" data-symbol="✧" aria-label="빈 네 꼭지 별">✧</button>
-              <button type="button" data-symbol="✩" aria-label="윤곽 별">✩</button>
-              <button type="button" data-symbol="✪" aria-label="원 안의 별">✪</button>
-            </div>
+        </div>
+        <div id="memoSymbolPalette" class="memo-symbol-palette" hidden>
+          <div class="memo-symbol-list">
+            <button type="button" data-symbol="❤️" aria-label="빨간색 하트">❤️</button>
+            <button type="button" data-symbol="🧡" aria-label="주황색 하트">🧡</button>
+            <button type="button" data-symbol="💛" aria-label="노란색 하트">💛</button>
+            <button type="button" data-symbol="💚" aria-label="초록색 하트">💚</button>
+            <button type="button" data-symbol="💙" aria-label="파란색 하트">💙</button>
+            <button type="button" data-symbol="💜" aria-label="보라색 하트">💜</button>
+            <button type="button" data-symbol="🤎" aria-label="갈색 하트">🤎</button>
+            <button type="button" data-symbol="🖤" aria-label="검은색 하트">🖤</button>
+            <button type="button" data-symbol="🩶" aria-label="회색 하트">🩶</button>
+            <button type="button" data-symbol="🤍" aria-label="흰색 하트">🤍</button>
+            <button type="button" data-symbol="🩷" aria-label="분홍색 하트">🩷</button>
+            <button type="button" data-symbol="🩵" aria-label="하늘색 하트">🩵</button>
+            <button type="button" data-symbol="💘" aria-label="화살이 꽂힌 하트">💘</button>
+            <button type="button" data-symbol="💝" aria-label="리본 하트">💝</button>
+            <button type="button" data-symbol="💖" aria-label="반짝이는 하트">💖</button>
+            <button type="button" data-symbol="💗" aria-label="커지는 하트">💗</button>
+            <button type="button" data-symbol="💓" aria-label="뛰는 하트">💓</button>
+            <button type="button" data-symbol="💞" aria-label="회전하는 하트">💞</button>
+            <button type="button" data-symbol="💕" aria-label="두 개의 하트">💕</button>
+            <button type="button" data-symbol="💟" aria-label="하트 장식">💟</button>
+            <button type="button" data-symbol="❣️" aria-label="하트 느낌표">❣️</button>
+            <button type="button" data-symbol="💔" aria-label="깨진 하트">💔</button>
+            <button type="button" data-symbol="❤️‍🔥" aria-label="불타는 하트">❤️‍🔥</button>
+            <button type="button" data-symbol="❤️‍🩹" aria-label="회복하는 하트">❤️‍🩹</button>
+            <button type="button" data-symbol="⭐" aria-label="노란 별">⭐</button>
+            <button type="button" data-symbol="🌟" aria-label="빛나는 별">🌟</button>
+            <button type="button" data-symbol="★" aria-label="검은 별">★</button>
+            <button type="button" data-symbol="☆" aria-label="빈 별">☆</button>
           </div>
           <p>문자를 누르면 메모의 현재 커서 위치에 입력됩니다.</p>
         </div>
