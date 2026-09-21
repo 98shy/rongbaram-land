@@ -1,7 +1,7 @@
 const MEMO_STORAGE_KEY = "rongbaram-land:memo-v1";
 const MEMO_PREFERENCES_KEY = "rongbaram-land:memo-preferences-v1";
 const MIN_FONT_SIZE = 12;
-const MAX_FONT_SIZE = 32;
+const MAX_FONT_SIZE = 48;
 const DEFAULT_FONT_SIZE = 16;
 const FONT_FAMILIES = {
   "noto-sans": '"Noto Sans KR", "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
@@ -66,7 +66,7 @@ function applyPreferences() {
   memoEditor.style.setProperty("--memo-font-size", `${preferences.fontSize}px`);
   memoEditor.style.setProperty("--memo-line-height", `${lineHeight}px`);
   memoFontFamily.value = preferences.fontFamily;
-  memoFontSize.textContent = `${preferences.fontSize}px`;
+  memoFontSize.value = preferences.fontSize;
   memoFontSmaller.disabled = preferences.fontSize <= MIN_FONT_SIZE;
   memoFontLarger.disabled = preferences.fontSize >= MAX_FONT_SIZE;
 }
@@ -116,6 +116,29 @@ memoFontFamily.addEventListener("change", () => {
 
 memoFontSmaller.addEventListener("click", () => updateFontSize(-1));
 memoFontLarger.addEventListener("click", () => updateFontSize(1));
+
+memoFontSize.addEventListener("input", () => {
+  const fontSize = Number.parseInt(memoFontSize.value, 10);
+  if (!Number.isFinite(fontSize) || fontSize < MIN_FONT_SIZE || fontSize > MAX_FONT_SIZE) return;
+  preferences.fontSize = fontSize;
+  applyPreferences();
+  savePreferences();
+});
+
+memoFontSize.addEventListener("change", () => {
+  const typedSize = Number.parseInt(memoFontSize.value, 10);
+  if (!Number.isFinite(typedSize)) {
+    applyPreferences();
+    return;
+  }
+  preferences.fontSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, typedSize));
+  applyPreferences();
+  savePreferences();
+});
+
+memoFontSize.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") memoFontSize.blur();
+});
 
 memoSymbolToggle.addEventListener("click", () => {
   const willOpen = memoSymbolPalette.hidden;

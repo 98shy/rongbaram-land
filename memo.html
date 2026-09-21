@@ -6,8 +6,8 @@
     <meta name="description" content="룽바람 랜드에서 사용하는 개인 메모장" />
     <title>룽바람 메모장 | Rongbraram Land</title>
     <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=21" />
-    <script src="memo.js?v=7" defer></script>
+    <link rel="stylesheet" href="styles.css?v=22" />
+    <script src="memo.js?v=8" defer></script>
   </head>
   <body class="memo-page">
     <main class="memo-page__shell">
@@ -65,7 +65,16 @@
             <span>글씨 크기</span>
             <div>
               <button id="memoFontSmaller" type="button" aria-label="글씨 크기 1픽셀 줄이기">−</button>
-              <strong id="memoFontSize" aria-live="polite">16px</strong>
+              <input
+                id="memoFontSize"
+                type="number"
+                min="12"
+                max="48"
+                step="1"
+                inputmode="numeric"
+                value="16"
+                aria-label="글씨 크기 직접 입력"
+              />
               <button id="memoFontLarger" type="button" aria-label="글씨 크기 1픽셀 늘리기">+</button>
             </div>
           </div>
