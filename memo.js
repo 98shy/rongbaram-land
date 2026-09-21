@@ -108,6 +108,14 @@ function saveMemo() {
 
 memoEditor.addEventListener("input", saveMemo);
 
+memoEditor.addEventListener("keydown", (event) => {
+  if (event.key !== "Tab" || event.shiftKey) return;
+  event.preventDefault();
+  const cursorPosition = memoEditor.selectionStart;
+  memoEditor.setRangeText("    ", cursorPosition, cursorPosition, "end");
+  saveMemo();
+});
+
 memoFontFamily.addEventListener("change", () => {
   preferences.fontFamily = memoFontFamily.value;
   applyPreferences();
