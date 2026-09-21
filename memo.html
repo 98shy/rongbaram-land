@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="룽바람 랜드에서 사용하는 개인 메모장" />
+    <title>룽바람 메모장 | Rongbraram Land</title>
+    <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
+    <link rel="stylesheet" href="styles.css?v=15" />
+    <script src="memo.js?v=1" defer></script>
+  </head>
+  <body class="memo-page">
+    <main class="memo-page__shell">
+      <header class="memo-page__header">
+        <div>
+          <span class="memo-page__eyebrow">RONGBRARAM LAND</span>
+          <h1>룽바람 메모장</h1>
+          <p>기억해둘 내용과 다음 게임 계획을 자유롭게 적어두세요.</p>
+        </div>
+        <a class="memo-back" href="index.html" aria-label="룽바람 랜드 챔피언 목록으로 돌아가기">
+          <span aria-hidden="true">←</span>
+          룽바람 랜드로 돌아가기
+        </a>
+      </header>
+
+      <section class="memo-card" aria-labelledby="memoLabel">
+        <div class="memo-card__top">
+          <label id="memoLabel" class="memo-card__label" for="memoEditor">나의 메모</label>
+          <span id="memoSaveStatus" class="memo-save-status" role="status" aria-live="polite">자동 저장됨</span>
+        </div>
+        <textarea
+          id="memoEditor"
+          class="memo-editor"
+          placeholder="예: 다음 판에는 아직 사용하지 않은 원거리 챔피언부터 확인하기"
+          spellcheck="true"
+        ></textarea>
+        <div class="memo-card__footer">
+          <span id="memoCharacterCount" class="memo-character-count">0자</span>
+          <button id="memoClearButton" class="memo-clear" type="button">메모 전체 삭제</button>
+        </div>
+      </section>
+
+      <p class="memo-page__notice">메모는 현재 브라우저에만 자동 저장됩니다.</p>
+    </main>
+  </body>
+</html>
