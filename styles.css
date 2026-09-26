@@ -393,6 +393,19 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 .memo-clear:focus-visible { color: #fff; background: var(--danger); outline: none; }
 .memo-page__notice { margin: 13px 2px 0; color: #aebbc0; font-size: 10px; text-align: right; }
 
+@media (min-width: 761px) {
+  .memo-page__shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100svh;
+  }
+  .memo-page__header,
+  .memo-page__notice { flex: 0 0 auto; }
+  .memo-card { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; }
+  .memo-editor { flex: 1 1 auto; min-height: 0; }
+}
+
 @media (max-width: 760px) {
   .app-shell { padding: 14px 14px 16px; }
   .hero { grid-template-columns: 1fr; gap: 18px; padding: 24px 22px; }
