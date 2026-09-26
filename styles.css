@@ -309,29 +309,30 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
   margin-bottom: 18px;
   padding: 22px 26px;
   color: #fff;
-  background: rgba(7, 24, 36, .86);
-  border: 1px solid rgba(227, 185, 93, .4);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, .22);
+  background: linear-gradient(135deg, rgba(17, 47, 34, .96), rgba(48, 81, 53, .92));
+  border: 1px solid rgba(157, 190, 126, .52);
+  box-shadow: 0 18px 42px rgba(5, 28, 18, .32);
   backdrop-filter: blur(10px);
 }
-.memo-page__eyebrow { display: block; margin-bottom: 5px; color: var(--gold-bright); font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+.memo-page__eyebrow { display: block; margin-bottom: 5px; color: #c9dfa1; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
 .memo-page__header h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); line-height: 1.2; }
-.memo-page__header p { margin: 7px 0 0; color: #b9c5c9; font-size: 12px; }
+.memo-page__header p { margin: 7px 0 0; color: #d2dfd2; font-size: 12px; }
 .memo-back {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 7px;
   padding: 9px 13px;
-  color: #f0ca78;
-  border: 1px solid rgba(227, 185, 93, .58);
+  color: #d8e9ba;
+  background: rgba(8, 34, 23, .24);
+  border: 1px solid rgba(169, 202, 130, .64);
   border-radius: 3px;
   text-decoration: none;
   font-size: 12px;
   font-weight: 700;
 }
 .memo-back:hover,
-.memo-back:focus-visible { color: #101820; background: var(--gold-bright); outline: none; }
+.memo-back:focus-visible { color: #14251a; background: #b8d68f; outline: none; }
 .memo-card { padding: 24px; background: rgba(255, 253, 248, .97); border: 1px solid rgba(227, 185, 93, .5); box-shadow: 0 18px 42px rgba(0, 0, 0, .24); }
 .memo-card__top { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 12px; }
 .memo-card__label { color: var(--ink); font-size: 13px; font-weight: 800; }
