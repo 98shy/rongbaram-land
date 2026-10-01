@@ -195,7 +195,7 @@ function attemptMatches() {
   while (state.matchState.pendingResults.length && state.matchState.pendingChampions.length) {
     const result = state.matchState.pendingResults.shift();
     const championId = state.matchState.pendingChampions.shift();
-    const match = { id: createMatchId(), championId, result, createdAt: Date.now() };
+    const match = { id: createMatchId(), championId, result, stake: state.record.stake, createdAt: Date.now() };
     state.matchState.matches.push(match);
     created.push(match);
   }
@@ -499,6 +499,7 @@ function toggleChampion(id) {
       id: replacement.id ?? createMatchId(),
       championId: id,
       result: replacement.result,
+      stake: Number.isFinite(replacement.stake) ? replacement.stake : state.record.stake,
       createdAt: replacement.createdAt ?? Date.now(),
     });
     state.matchState.replacement = null;
@@ -524,6 +525,7 @@ function toggleChampion(id) {
       state.matchState.replacement = {
         id: match.id,
         result: match.result,
+        stake: Number.isFinite(match.stake) ? match.stake : state.record.stake,
         createdAt: match.createdAt,
       };
     }
