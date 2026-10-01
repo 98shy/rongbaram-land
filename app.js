@@ -3,6 +3,7 @@ const FALLBACK_VERSION = "16.18.1";
 const STORAGE_KEY = "lol-champion-tracker:used-v1";
 const RECORD_STORAGE_KEY = "lol-champion-tracker:record-v1";
 const MATCH_STORAGE_KEY = "lol-champion-tracker:matches-v1";
+const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const CHAMPION_ALIASES = {
   Morgana: ["몰가"],
   Pantheon: ["빵테"],
@@ -51,6 +52,7 @@ const ui = {
   winRate: document.querySelector("#winRate"),
   recordControls: document.querySelector(".record-card__controls"),
   recordReset: document.querySelector("#recordResetButton"),
+  recordSave: document.querySelector("#recordSaveButton"),
   stakeCount: document.querySelector("#stakeCount"),
   stakeControls: document.querySelector("#stakeControls"),
   settlementResult: document.querySelector("#settlementResult"),
@@ -139,6 +141,46 @@ function saveMatchState() {
     localStorage.setItem(MATCH_STORAGE_KEY, JSON.stringify(state.matchState));
   } catch {
     // 저장소가 차단된 브라우저에서도 매핑 기능은 계속 동작합니다.
+  }
+}
+
+function readLandRecords() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LAND_RECORDS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCurrentLandRecord() {
+  const games = state.record.wins + state.record.losses;
+  if (games === 0) return showToast("저장할 전적이 없습니다.");
+
+  const mappedChampions = state.matchState.matches
+    .slice()
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map((match) => ({ id: match.championId, result: match.result }));
+  const includedIds = new Set(mappedChampions.map((champion) => champion.id));
+  const remainingChampions = [...state.used]
+    .filter((id) => !includedIds.has(id))
+    .map((id) => ({ id, result: null }));
+  const records = readLandRecords();
+  records.push({
+    id: createMatchId(),
+    createdAt: Date.now(),
+    wins: state.record.wins,
+    losses: state.record.losses,
+    stake: state.record.stake,
+    settlement: (state.record.wins - state.record.losses) * state.record.stake,
+    champions: [...mappedChampions, ...remainingChampions],
+  });
+
+  try {
+    localStorage.setItem(LAND_RECORDS_STORAGE_KEY, JSON.stringify(records));
+    showToast("현재 전적을 랜드 전적에 저장했습니다.");
+  } catch {
+    showToast("브라우저 저장 공간을 확인해 주세요.");
   }
 }
 
@@ -700,6 +742,8 @@ ui.recordReset.addEventListener("click", () => {
   renderGameState();
   showToast("승패 기록을 초기화했습니다.");
 });
+
+ui.recordSave.addEventListener("click", saveCurrentLandRecord);
 
 function cancelChampionReplacement() {
   if (state.replacingMatchId) {

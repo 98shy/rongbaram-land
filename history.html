@@ -3,27 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="룽바람 랜드의 날짜별 누적 전적" />
-    <title>누적 전적 | 룽바람 랜드</title>
+    <meta name="description" content="룽바람 랜드에서 저장한 날짜별 전적" />
+    <title>랜드 전적 | 룽바람 랜드</title>
     <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
-    <link rel="stylesheet" href="styles.css?v=38" />
-    <script src="history.js?v=1" defer></script>
+    <link rel="stylesheet" href="styles.css?v=39" />
+    <script src="history.js?v=2" defer></script>
   </head>
   <body class="history-page">
     <main class="history-page__shell">
       <header class="history-page__header">
         <div>
           <span class="history-page__eyebrow">RONGBARAM RECORDS</span>
-          <h1>누적 전적</h1>
-          <p>매핑이 완료된 경기 기록을 날짜별로 확인하세요.</p>
+          <h1>랜드 전적</h1>
+          <p>룽바람 랜드에서 저장한 전적을 날짜별로 확인하세요.</p>
         </div>
         <a href="index.html">← 룽바람 랜드로 돌아가기</a>
       </header>
 
-      <section class="history-summary" aria-label="전체 누적 요약">
-        <div><span>누적 경기</span><strong id="historyTotalGames">0경기</strong></div>
-        <div><span>누적 전적</span><strong id="historyTotalRecord">0승 0패</strong></div>
-        <div><span>누적 결산</span><strong id="historyTotalSettlement">0개</strong></div>
+      <section class="history-summary" aria-label="저장된 전체 전적 요약">
+        <div><span>전체 경기</span><strong id="historyTotalGames">0경기</strong></div>
+        <div><span>전체 전적</span><strong id="historyTotalRecord">0승 0패</strong></div>
+        <div><span>전체 결산</span><strong id="historyTotalSettlement">0개</strong></div>
       </section>
 
       <section class="history-card" aria-labelledby="historyListTitle">
@@ -39,13 +39,12 @@
         </div>
         <div id="historyList" class="history-list"></div>
         <div id="historyEmpty" class="history-empty" hidden>
-          <strong>아직 누적된 경기 기록이 없습니다.</strong>
-          <p>룽바람 랜드에서 승패와 챔피언을 연결하면 여기에 자동으로 표시됩니다.</p>
+          <strong>아직 저장된 랜드 전적이 없습니다.</strong>
+          <p>룽바람 랜드에서 전적 저장 버튼을 누르면 여기에 표시됩니다.</p>
         </div>
-        <p id="historyLegacyNotice" class="history-legacy" hidden></p>
       </section>
 
-      <p class="history-page__notice">전적은 현재 브라우저에 저장되며, 룽바람 랜드의 변경 사항이 이 페이지에 자동 반영됩니다.</p>
+      <p class="history-page__notice">랜드 전적은 현재 브라우저에 저장되며, 다른 탭에서 저장한 내용도 자동으로 반영됩니다.</p>
     </main>
   </body>
 </html>

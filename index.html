@@ -7,8 +7,8 @@
     <title>룽바람 랜드 | Rongbraram Land</title>
     <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
     <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=38" />
-    <script src="app.js?v=12" defer></script>
+    <link rel="stylesheet" href="styles.css?v=39" />
+    <script src="app.js?v=13" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -22,11 +22,11 @@
               </svg>
               메모장
             </a>
-            <a class="memo-link" href="history.html" target="_blank" rel="noopener noreferrer" aria-label="누적 전적을 새 탭에서 열기">
+            <a class="memo-link" href="history.html" target="_blank" rel="noopener noreferrer" aria-label="랜드 전적을 새 탭에서 열기">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
               </svg>
-              누적 전적
+              랜드 전적
             </a>
           </div>
         </details>
@@ -40,13 +40,16 @@
         <div class="hero__dashboard">
           <section class="record-card" aria-label="현재 승패 기록">
             <div class="record-card__summary">
-              <div>
+              <div class="record-card__current">
                 <span class="record-card__label">현재 전적</span>
                 <strong><span id="winCount">0</span>승 <span id="lossCount">0</span>패</strong>
               </div>
-              <div class="win-rate">
-                <span>승률</span>
-                <strong id="winRate">—</strong>
+              <div class="record-card__summary-actions">
+                <div class="win-rate">
+                  <span>승률</span>
+                  <strong id="winRate">—</strong>
+                </div>
+                <button id="recordSaveButton" class="record-action-button record-save" type="button">전적 저장</button>
               </div>
             </div>
             <div class="record-card__controls">
@@ -62,7 +65,7 @@
                 <strong id="lossControlCount">0</strong>
                 <button type="button" data-record="loss" data-delta="1" aria-label="패배 1회 추가">+</button>
               </div>
-              <button id="recordResetButton" class="record-reset" type="button">전적 초기화</button>
+              <button id="recordResetButton" class="record-action-button record-reset" type="button">전적 초기화</button>
             </div>
             <div class="settlement">
               <div class="settlement__stake">
