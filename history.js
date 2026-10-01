@@ -5,7 +5,6 @@ const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const ui = {
   list: document.querySelector("#historyList"),
   empty: document.querySelector("#historyEmpty"),
-  totalGames: document.querySelector("#historyTotalGames"),
   totalRecord: document.querySelector("#historyTotalRecord"),
   totalSettlement: document.querySelector("#historyTotalSettlement"),
   updatedAt: document.querySelector("#historyUpdatedAt"),
@@ -24,20 +23,27 @@ function readLandRecords() {
   }
 }
 
+function writeLandRecords(records) {
+  try {
+    localStorage.setItem(LAND_RECORDS_STORAGE_KEY, JSON.stringify(records));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function recordKey(record) {
+  return String(record.id ?? record.createdAt);
+}
+
 function displayDate(timestamp) {
   const date = new Date(Number(timestamp));
   if (Number.isNaN(date.getTime())) return "날짜 미상";
-  const day = new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "short",
-  }).format(date);
-  const time = new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-  return `${day} · ${time}`;
+  const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+  const period = date.getHours() < 12 ? "오전" : "오후";
+  const hour = String(date.getHours() % 12 || 12).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${weekdays[date.getDay()]}) · ${period} ${hour}:${minute}`;
 }
 
 function formatSettlement(value) {
@@ -71,7 +77,6 @@ function normalizedChampions(record) {
 
 function renderHistory() {
   const records = readLandRecords();
-  let totalGames = 0;
   let totalWins = 0;
   let totalLosses = 0;
   let totalSettlement = 0;
@@ -83,13 +88,13 @@ function renderHistory() {
     const stake = Math.max(0, Number.parseInt(record.stake, 10) || 0);
     const storedSettlement = Number(record.settlement);
     const settlement = Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
-    totalGames += wins + losses;
     totalWins += wins;
     totalLosses += losses;
     totalSettlement += settlement;
 
     const row = document.createElement("article");
     row.className = "history-row";
+    row.dataset.recordId = recordKey(record);
     const champions = document.createElement("div");
     champions.className = "history-champions";
 
@@ -99,8 +104,8 @@ function renderHistory() {
       image.src = `${DDRAGON_ROOT}/cdn/${ddragonVersion}/img/champion/${champion?.image.full ?? `${savedChampion.id}.png`}`;
       image.alt = champion?.name ?? savedChampion.id;
       image.title = champion?.name ?? savedChampion.id;
-      image.width = 44;
-      image.height = 44;
+      image.width = 36;
+      image.height = 36;
       image.loading = "lazy";
       const resultClass = savedChampion.result === "win" || savedChampion.result === "loss"
         ? ` history-champion--${savedChampion.result}`
@@ -119,24 +124,82 @@ function renderHistory() {
     const settlementClass = settlement > 0
       ? "history-settlement is-positive"
       : settlement < 0 ? "history-settlement is-negative" : "history-settlement";
+
+    const opponentEditor = document.createElement("div");
+    opponentEditor.className = "history-opponent";
+    const opponentInput = document.createElement("input");
+    opponentInput.type = "text";
+    opponentInput.maxLength = 40;
+    opponentInput.placeholder = "상대를 입력하세요";
+    opponentInput.value = typeof record.opponent === "string" ? record.opponent : "";
+    opponentInput.setAttribute("aria-label", "상대 입력");
+    const opponentSave = document.createElement("button");
+    opponentSave.type = "button";
+    opponentSave.dataset.action = "save-opponent";
+    opponentSave.textContent = "최종 저장";
+    opponentEditor.append(opponentInput, opponentSave);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.dataset.action = "delete-record";
+    deleteButton.textContent = "삭제";
+
     row.append(
       createCell("날짜", createTextValue(displayDate(record.createdAt))),
-      createCell("승패 전적", createTextValue(`${wins}승 ${losses}패`)),
+      createCell("승패 전적", createTextValue(`${wins}승 ${losses}패`, "history-record-score")),
       createCell("사용 챔피언", champions),
-      createCell("최종 결산", createTextValue(formatSettlement(settlement), settlementClass))
+      createCell("상대", opponentEditor),
+      createCell("최종 결산", createTextValue(formatSettlement(settlement), settlementClass)),
+      createCell("관리", deleteButton, "history-cell--actions")
     );
     fragment.append(row);
   });
 
   ui.list.replaceChildren(fragment);
   ui.empty.hidden = records.length !== 0;
-  ui.totalGames.textContent = `${totalGames.toLocaleString("ko-KR")}경기`;
   ui.totalRecord.textContent = `${totalWins}승 ${totalLosses}패`;
   ui.totalSettlement.textContent = formatSettlement(totalSettlement);
   ui.totalSettlement.classList.toggle("is-positive", totalSettlement > 0);
   ui.totalSettlement.classList.toggle("is-negative", totalSettlement < 0);
   ui.updatedAt.textContent = `최근 확인 ${new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date())}`;
 }
+
+ui.list.addEventListener("input", (event) => {
+  if (event.target.matches(".history-opponent input")) event.target.setCustomValidity("");
+});
+
+ui.list.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action]");
+  if (!button) return;
+  const row = button.closest(".history-row");
+  const records = readLandRecords();
+  const recordIndex = records.findIndex((record) => recordKey(record) === row?.dataset.recordId);
+  if (recordIndex < 0) return;
+
+  if (button.dataset.action === "save-opponent") {
+    const input = row.querySelector(".history-opponent input");
+    const opponent = input.value.trim();
+    if (!opponent) {
+      input.setCustomValidity("상대를 입력해 주세요.");
+      input.reportValidity();
+      return;
+    }
+    records[recordIndex].opponent = opponent;
+    if (!writeLandRecords(records)) return window.alert("브라우저 저장 공간을 확인해 주세요.");
+    input.value = opponent;
+    button.textContent = "저장 완료";
+    window.setTimeout(() => { button.textContent = "최종 저장"; }, 1200);
+    return;
+  }
+
+  if (button.dataset.action === "delete-record") {
+    if (!window.confirm("이 전적 기록을 삭제할까요?")) return;
+    records.splice(recordIndex, 1);
+    if (!writeLandRecords(records)) return window.alert("브라우저 저장 공간을 확인해 주세요.");
+    renderHistory();
+  }
+});
 
 async function loadChampionData() {
   try {
