@@ -8,6 +8,7 @@ const ui = {
   totalRecord: document.querySelector("#historyTotalRecord"),
   totalSettlement: document.querySelector("#historyTotalSettlement"),
   updatedAt: document.querySelector("#historyUpdatedAt"),
+  close: document.querySelector("#historyCloseButton"),
 };
 
 let ddragonVersion = FALLBACK_VERSION;
@@ -258,6 +259,13 @@ async function loadChampionData() {
 
 window.addEventListener("storage", (event) => {
   if (event.key === LAND_RECORDS_STORAGE_KEY) renderHistory();
+});
+
+ui.close.addEventListener("click", () => {
+  window.close();
+  window.setTimeout(() => {
+    if (!window.closed) window.location.href = "index.html";
+  }, 120);
 });
 
 renderHistory();
