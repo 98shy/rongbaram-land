@@ -184,7 +184,13 @@ function renderHistory() {
   ui.totalSettlement.textContent = formatSettlement(totalSettlement);
   ui.totalSettlement.classList.toggle("is-positive", totalSettlement > 0);
   ui.totalSettlement.classList.toggle("is-negative", totalSettlement < 0);
-  ui.updatedAt.textContent = `최근 확인 ${new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date())}`;
+  const latestSavedAt = records.reduce((latest, record) => {
+    const timestamp = Number(record.updatedAt ?? record.createdAt);
+    return Number.isFinite(timestamp) ? Math.max(latest, timestamp) : latest;
+  }, 0);
+  ui.updatedAt.textContent = latestSavedAt
+    ? `최근 저장 ${new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(latestSavedAt))}`
+    : "최근 저장 기록 없음";
 }
 
 ui.list.addEventListener("input", (event) => {
@@ -208,6 +214,7 @@ ui.list.addEventListener("click", (event) => {
       return;
     }
     records[recordIndex].balance = balance;
+    records[recordIndex].updatedAt = Date.now();
     delete records[recordIndex].opponent;
     if (!writeLandRecords(records)) return window.alert("브라우저 저장 공간을 확인해 주세요.");
     renderHistory();
