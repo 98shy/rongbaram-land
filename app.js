@@ -725,7 +725,7 @@ function closeMatchHistory() {
 function positionMatchHistory() {
   if (!ui.matchHistoryDialog.open) return;
   const bounds = ui.matchHistoryButton.getBoundingClientRect();
-  const width = Math.min(380, window.innerWidth - 24);
+  const width = Math.min(480, window.innerWidth - 24);
   const left = Math.max(12, Math.min(bounds.right - width, window.innerWidth - width - 12));
   const top = Math.max(12, Math.min(bounds.bottom + 8, window.innerHeight - 180));
   ui.matchHistoryDialog.style.width = `${width}px`;
