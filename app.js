@@ -153,6 +153,16 @@ function readLandRecords() {
   }
 }
 
+function clearCurrentSession() {
+  state.history = [];
+  state.used.clear();
+  state.record = { ...state.record, wins: 0, losses: 0 };
+  state.matchState = { matches: [], pendingResults: [], pendingChampions: [], replacement: null };
+  state.replacingMatchId = null;
+  saveGameState();
+  renderGameState();
+}
+
 function saveCurrentLandRecord() {
   const games = state.record.wins + state.record.losses;
   if (games === 0) return showToast("저장할 전적이 없습니다.");
@@ -178,7 +188,8 @@ function saveCurrentLandRecord() {
 
   try {
     localStorage.setItem(LAND_RECORDS_STORAGE_KEY, JSON.stringify(records));
-    showToast("현재 전적을 랜드 전적에 저장했습니다.");
+    clearCurrentSession();
+    showToast("랜드 전적에 저장하고 현재 기록을 초기화했습니다.");
   } catch {
     showToast("브라우저 저장 공간을 확인해 주세요.");
   }
@@ -656,7 +667,6 @@ ui.undo.addEventListener("click", () => {
 
 ui.reset.addEventListener("click", () => {
   if (!state.used.size) return showToast("초기화할 기록이 없습니다.");
-  if (!window.confirm(`${state.used.size}명의 사용 기록을 모두 초기화할까요? 연결된 승패는 다시 매핑 대기 상태가 됩니다.`)) return;
   takeSnapshot();
   const returnedResults = state.matchState.matches.map((match) => match.result);
   if (state.matchState.replacement) returnedResults.push(state.matchState.replacement.result);
@@ -729,18 +739,11 @@ ui.stakeControls.querySelectorAll("[data-stake-delta]").forEach((button) => {
 });
 
 ui.recordReset.addEventListener("click", () => {
-  if (state.record.wins + state.record.losses === 0) return showToast("초기화할 전적이 없습니다.");
-  if (!window.confirm("현재 승패와 연결된 경기 기록을 모두 초기화할까요?")) return;
-  state.history = [];
-  state.matchState.matches.forEach((match) => state.used.delete(match.championId));
-  state.record = { ...state.record, wins: 0, losses: 0 };
-  state.matchState.matches = [];
-  state.matchState.pendingResults = [];
-  state.matchState.replacement = null;
-  state.replacingMatchId = null;
-  saveGameState();
-  renderGameState();
-  showToast("승패 기록을 초기화했습니다.");
+  if (state.record.wins + state.record.losses === 0 && state.used.size === 0) {
+    return showToast("초기화할 전적과 챔피언 기록이 없습니다.");
+  }
+  clearCurrentSession();
+  showToast("전적과 챔피언 기록을 초기화했습니다.");
 });
 
 ui.recordSave.addEventListener("click", saveCurrentLandRecord);
