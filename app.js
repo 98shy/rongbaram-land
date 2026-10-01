@@ -291,7 +291,8 @@ function renderMatchHistory() {
     notice.textContent = `기존 전적 ${legacyCount}경기는 자동 매핑 적용 이전 합계라 상세 기록에 표시되지 않습니다.`;
     completedFragment.append(notice);
   }
-  [...matches].map((match, index) => ({ match, number: index + 1 })).reverse().forEach(({ match, number }) => {
+  [...matches].sort((a, b) => a.createdAt - b.createdAt)
+    .map((match, index) => ({ match, number: index + 1 })).reverse().forEach(({ match, number }) => {
     const row = document.createElement("article");
     row.className = "match-record";
     const numberElement = document.createElement("span");
@@ -300,9 +301,15 @@ function renderMatchHistory() {
     const resultElement = document.createElement("strong");
     resultElement.className = `match-record__result match-record__result--${match.result}`;
     resultElement.textContent = resultLabel(match.result);
-    const championElement = document.createElement("span");
+    const championElement = document.createElement("img");
     championElement.className = "match-record__champion";
-    championElement.textContent = getChampionName(match.championId);
+    const champion = state.champions.find((item) => item.id === match.championId);
+    championElement.src = `${DDRAGON_ROOT}/cdn/${state.version || FALLBACK_VERSION}/img/champion/${champion?.image.full ?? `${match.championId}.png`}`;
+    championElement.alt = getChampionName(match.championId);
+    championElement.title = getChampionName(match.championId);
+    championElement.width = 44;
+    championElement.height = 44;
+    championElement.loading = "lazy";
     const actions = document.createElement("div");
     actions.className = "match-record__actions";
     actions.append(

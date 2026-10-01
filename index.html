@@ -7,11 +7,19 @@
     <title>룽바람 랜드 | Rongbraram Land</title>
     <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
     <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=29" />
-    <script src="app.js?v=7" defer></script>
+    <link rel="stylesheet" href="styles.css?v=30" />
+    <script src="app.js?v=8" defer></script>
   </head>
   <body>
     <div class="app-shell">
+      <nav class="page-actions" aria-label="페이지 이동">
+        <a class="memo-link" href="memo.html" aria-label="메모장으로 이동">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 3.75h9.5L19 7.25v13H6zM15.5 3.75v3.5H19M9 11h7M9 15h7" />
+          </svg>
+          메모장
+        </a>
+      </nav>
       <header class="hero">
         <div class="hero__brand">
           <h1>룽바람 랜드</h1>
@@ -74,12 +82,6 @@
               <input id="searchInput" type="search" placeholder="챔피언 이름 검색" autocomplete="off" />
               <kbd>/</kbd>
             </div>
-            <a class="memo-link" href="memo.html" aria-label="룽바람 메모장으로 이동">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 3.75h9.5L19 7.25v13H6zM15.5 3.75v3.5H19M9 11h7M9 15h7" />
-              </svg>
-              메모장
-            </a>
           </div>
 
           <div id="roleFilters" class="filter-row" aria-label="역할군 필터">
