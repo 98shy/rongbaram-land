@@ -413,7 +413,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 .history-card__title h2 { margin: 0; font-size: 15px; }
 .history-card__title span { color: var(--muted); font-size: 10px; }
 .history-table__header,
-.history-row { display: grid; grid-template-columns: 185px 190px 115px minmax(300px, 1fr) 130px 130px; align-items: center; gap: 16px; }
+.history-row { display: grid; grid-template-columns: 185px 150px 115px minmax(340px, 1fr) 130px 130px; align-items: center; gap: 16px; }
 .history-table__header { padding: 0 14px 9px; color: var(--muted); font-size: 10px; font-weight: 800; }
 .history-table__header span:last-child { text-align: center; }
 .history-list { display: grid; gap: 8px; }
@@ -464,7 +464,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 
 @media (min-width: 761px) and (max-width: 1200px) {
   .history-table__header,
-  .history-row { grid-template-columns: 160px 155px 100px minmax(180px, 1fr) 110px 115px; gap: 10px; }
+  .history-row { grid-template-columns: 160px 130px 100px minmax(205px, 1fr) 110px 115px; gap: 10px; }
 }
 
 /* Memo page */
