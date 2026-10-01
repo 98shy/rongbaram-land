@@ -292,7 +292,7 @@ function renderMatchHistory() {
     completedFragment.append(notice);
   }
   [...matches].sort((a, b) => a.createdAt - b.createdAt)
-    .map((match, index) => ({ match, number: index + 1 })).reverse().forEach(({ match, number }) => {
+    .map((match, index) => ({ match, number: index + 1 })).forEach(({ match, number }) => {
     const row = document.createElement("article");
     row.className = "match-record";
     const numberElement = document.createElement("span");
@@ -706,17 +706,41 @@ function cancelChampionReplacement() {
 
 ui.cancelChampionChange.addEventListener("click", cancelChampionReplacement);
 
+function closeMatchHistory() {
+  ui.matchHistoryDialog.close();
+  ui.matchHistoryButton.setAttribute("aria-expanded", "false");
+}
+
+function positionMatchHistory() {
+  if (!ui.matchHistoryDialog.open) return;
+  const bounds = ui.matchHistoryButton.getBoundingClientRect();
+  const width = Math.min(420, window.innerWidth - 24);
+  const left = Math.max(12, Math.min(bounds.right - width, window.innerWidth - width - 12));
+  const top = Math.max(12, Math.min(bounds.bottom + 8, window.innerHeight - 180));
+  ui.matchHistoryDialog.style.width = `${width}px`;
+  ui.matchHistoryDialog.style.left = `${left}px`;
+  ui.matchHistoryDialog.style.top = `${top}px`;
+  ui.matchHistoryDialog.style.setProperty("--panel-height", `${Math.max(160, window.innerHeight - top - 12)}px`);
+}
+
 ui.matchHistoryButton.addEventListener("click", () => {
+  if (ui.matchHistoryDialog.open) return closeMatchHistory();
   renderMatchHistory();
-  if (typeof ui.matchHistoryDialog.showModal === "function") ui.matchHistoryDialog.showModal();
-  else ui.matchHistoryDialog.setAttribute("open", "");
+  ui.matchHistoryDialog.show();
+  ui.matchHistoryButton.setAttribute("aria-expanded", "true");
+  positionMatchHistory();
 });
 
-ui.matchHistoryClose.addEventListener("click", () => ui.matchHistoryDialog.close());
-
-ui.matchHistoryDialog.addEventListener("click", (event) => {
-  if (event.target === ui.matchHistoryDialog) ui.matchHistoryDialog.close();
+ui.matchHistoryClose.addEventListener("click", () => {
+  closeMatchHistory();
+  ui.matchHistoryButton.focus();
 });
+document.addEventListener("pointerdown", (event) => {
+  if (ui.matchHistoryDialog.open && !ui.matchHistoryDialog.contains(event.target)
+    && !ui.matchHistoryButton.contains(event.target)) closeMatchHistory();
+});
+window.addEventListener("resize", positionMatchHistory);
+window.addEventListener("scroll", positionMatchHistory, true);
 
 ui.pendingMatchList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-action]");
@@ -749,7 +773,7 @@ ui.completedMatchList.addEventListener("click", (event) => {
 
   if (button.dataset.action === "change-champion") {
     state.replacingMatchId = match.id;
-    ui.matchHistoryDialog.close();
+    closeMatchHistory();
     renderMatchHistory();
     ui.grid.scrollIntoView({ behavior: "smooth", block: "start" });
     return showToast(`${getChampionName(match.championId)} 대신 사용할 챔피언을 선택하세요.`);
@@ -770,6 +794,11 @@ ui.completedMatchList.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && ui.matchHistoryDialog.open) {
+    closeMatchHistory();
+    ui.matchHistoryButton.focus();
+    return;
+  }
   if (event.key === "/" && !ui.matchHistoryDialog.open && document.activeElement !== ui.search) {
     event.preventDefault();
     ui.search.focus();
