@@ -134,7 +134,8 @@ button { color: inherit; }
 .page-menu__arrow { position: absolute; top: 50%; right: 19px; width: 8px; height: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-70%) rotate(45deg); transform-origin: center; transition: transform 160ms; }
 .page-menu[open] .page-menu__arrow { transform: translateY(-30%) rotate(225deg); }
 .page-menu__items { position: absolute; top: calc(100% + 7px); right: 0; width: 100%; min-width: 120px; padding: 7px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow); }
-.page-menu__items .memo-link { display: flex; justify-content: center; gap: 10px; margin: 0; border: 0; padding: 11px 10px; font-size: 13px; letter-spacing: .13em; }
+.page-menu__items .memo-link { display: flex; justify-content: center; gap: 10px; margin: 0; border: 0; padding: 11px 10px; font-size: 15px; letter-spacing: .08em; }
+.page-menu__items .memo-link svg { width: 17px; height: 17px; }
 @media (max-width: 1740px) {
   .page-actions { position: static; margin-bottom: 10px; }
   .page-menu { width: 82px; }
@@ -508,6 +509,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
   .page-menu summary { min-height: 38px; padding: 8px 24px 8px 7px; font-size: 12px; letter-spacing: .08em; }
   .page-menu__label { transform: translateX(8px); }
   .page-menu__arrow { right: 9px; width: 7px; height: 7px; }
+  .page-menu__items .memo-link { font-size: 12px; letter-spacing: .04em; }
+  .page-menu__items .memo-link svg { width: 14px; height: 14px; }
   .mapping-status { align-items: flex-start; }
   .toolbar__bottom { align-items: flex-start; }
   .toolbar__actions { align-items: flex-end; flex-direction: column; gap: 5px; }
