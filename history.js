@@ -43,7 +43,7 @@ function displayDate(timestamp) {
   const period = date.getHours() < 12 ? "오전" : "오후";
   const hour = String(date.getHours() % 12 || 12).padStart(2, "0");
   const minute = String(date.getMinutes()).padStart(2, "0");
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${weekdays[date.getDay()]}) · ${period} ${hour}:${minute}`;
+  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 (${weekdays[date.getDay()]})\n${period} ${hour}:${minute}`;
 }
 
 function formatSettlement(value) {
@@ -73,6 +73,21 @@ function normalizedChampions(record) {
     ? { id: champion, result: null }
     : champion
   ).filter((champion) => champion?.id);
+}
+
+function getBalance(record) {
+  if (typeof record.balance === "string") return record.balance;
+  return typeof record.opponent === "string" ? record.opponent : "";
+}
+
+function createBalanceInput(value = "") {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.maxLength = 40;
+  input.placeholder = "밸런스를 입력하세요";
+  input.value = value;
+  input.setAttribute("aria-label", "밸런스 입력");
+  return input;
 }
 
 function renderHistory() {
@@ -125,33 +140,40 @@ function renderHistory() {
       ? "history-settlement is-positive"
       : settlement < 0 ? "history-settlement is-negative" : "history-settlement";
 
-    const opponentEditor = document.createElement("div");
-    opponentEditor.className = "history-opponent";
-    const opponentInput = document.createElement("input");
-    opponentInput.type = "text";
-    opponentInput.maxLength = 40;
-    opponentInput.placeholder = "상대를 입력하세요";
-    opponentInput.value = typeof record.opponent === "string" ? record.opponent : "";
-    opponentInput.setAttribute("aria-label", "상대 입력");
-    const opponentSave = document.createElement("button");
-    opponentSave.type = "button";
-    opponentSave.dataset.action = "save-opponent";
-    opponentSave.textContent = "최종 저장";
-    opponentEditor.append(opponentInput, opponentSave);
+    const savedBalance = getBalance(record);
+    const balanceField = document.createElement("div");
+    balanceField.className = "history-balance";
+    if (savedBalance) {
+      const balanceText = document.createElement("strong");
+      balanceText.className = "history-balance__text";
+      balanceText.textContent = savedBalance;
+      balanceField.append(balanceText);
+    } else {
+      balanceField.append(createBalanceInput());
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "history-actions";
+    const balanceButton = document.createElement("button");
+    balanceButton.type = "button";
+    balanceButton.className = "history-balance-action";
+    balanceButton.dataset.action = savedBalance ? "edit-balance" : "save-balance";
+    balanceButton.textContent = savedBalance ? "수정" : "저장";
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "history-delete";
     deleteButton.dataset.action = "delete-record";
     deleteButton.textContent = "삭제";
+    actions.append(balanceButton, deleteButton);
 
     row.append(
-      createCell("날짜", createTextValue(displayDate(record.createdAt))),
+      createCell("날짜", createTextValue(displayDate(record.createdAt), "history-date")),
+      createCell("밸런스", balanceField),
       createCell("승패 전적", createTextValue(`${wins}승 ${losses}패`, "history-record-score")),
       createCell("사용 챔피언", champions),
-      createCell("상대", opponentEditor),
       createCell("최종 결산", createTextValue(formatSettlement(settlement), settlementClass)),
-      createCell("관리", deleteButton, "history-cell--actions")
+      createCell("관리", actions, "history-cell--actions")
     );
     fragment.append(row);
   });
@@ -166,7 +188,7 @@ function renderHistory() {
 }
 
 ui.list.addEventListener("input", (event) => {
-  if (event.target.matches(".history-opponent input")) event.target.setCustomValidity("");
+  if (event.target.matches(".history-balance input")) event.target.setCustomValidity("");
 });
 
 ui.list.addEventListener("click", (event) => {
@@ -177,19 +199,29 @@ ui.list.addEventListener("click", (event) => {
   const recordIndex = records.findIndex((record) => recordKey(record) === row?.dataset.recordId);
   if (recordIndex < 0) return;
 
-  if (button.dataset.action === "save-opponent") {
-    const input = row.querySelector(".history-opponent input");
-    const opponent = input.value.trim();
-    if (!opponent) {
-      input.setCustomValidity("상대를 입력해 주세요.");
+  if (button.dataset.action === "save-balance") {
+    const input = row.querySelector(".history-balance input");
+    const balance = input.value.trim();
+    if (!balance) {
+      input.setCustomValidity("밸런스를 입력해 주세요.");
       input.reportValidity();
       return;
     }
-    records[recordIndex].opponent = opponent;
+    records[recordIndex].balance = balance;
+    delete records[recordIndex].opponent;
     if (!writeLandRecords(records)) return window.alert("브라우저 저장 공간을 확인해 주세요.");
-    input.value = opponent;
-    button.textContent = "저장 완료";
-    window.setTimeout(() => { button.textContent = "최종 저장"; }, 1200);
+    renderHistory();
+    return;
+  }
+
+  if (button.dataset.action === "edit-balance") {
+    const balanceField = row.querySelector(".history-balance");
+    const input = createBalanceInput(getBalance(records[recordIndex]));
+    balanceField.replaceChildren(input);
+    button.dataset.action = "save-balance";
+    button.textContent = "저장";
+    input.focus();
+    input.select();
     return;
   }
 
