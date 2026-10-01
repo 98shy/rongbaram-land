@@ -219,6 +219,10 @@ function createSmallButton(label, action, value) {
   return button;
 }
 
+function getOrderedMatches() {
+  return [...state.matchState.matches].sort((a, b) => a.createdAt - b.createdAt);
+}
+
 function renderMatchHistory() {
   const { matches, pendingResults, pendingChampions, replacement } = state.matchState;
   const pendingCount = pendingResults.length + pendingChampions.length + (replacement ? 1 : 0);
@@ -291,7 +295,7 @@ function renderMatchHistory() {
     notice.textContent = `기존 전적 ${legacyCount}경기는 자동 매핑 적용 이전 합계라 상세 기록에 표시되지 않습니다.`;
     completedFragment.append(notice);
   }
-  [...matches].sort((a, b) => a.createdAt - b.createdAt)
+  getOrderedMatches()
     .map((match, index) => ({ match, number: index + 1 })).forEach(({ match, number }) => {
     const row = document.createElement("article");
     row.className = "match-record";
@@ -301,6 +305,8 @@ function renderMatchHistory() {
     const resultElement = document.createElement("strong");
     resultElement.className = `match-record__result match-record__result--${match.result}`;
     resultElement.textContent = resultLabel(match.result);
+    const championDetails = document.createElement("span");
+    championDetails.className = "match-record__champion-details";
     const championElement = document.createElement("img");
     championElement.className = "match-record__champion";
     const champion = state.champions.find((item) => item.id === match.championId);
@@ -310,13 +316,18 @@ function renderMatchHistory() {
     championElement.width = 44;
     championElement.height = 44;
     championElement.loading = "lazy";
+    const championName = document.createElement("span");
+    championName.className = "match-record__champion-name";
+    championName.textContent = getChampionName(match.championId);
+    championName.title = championName.textContent;
+    championDetails.append(championElement, championName);
     const actions = document.createElement("div");
     actions.className = "match-record__actions";
     actions.append(
       createSmallButton("챔피언 변경", "change-champion", match.id),
       createSmallButton("삭제", "delete-match", match.id)
     );
-    row.append(numberElement, resultElement, championElement, actions);
+    row.append(numberElement, resultElement, championDetails, actions);
     completedFragment.append(row);
   });
   if (!matches.length && !legacyCount) completedFragment.append(createEmptyMessage("아직 완료된 경기 기록이 없습니다."));
@@ -714,7 +725,7 @@ function closeMatchHistory() {
 function positionMatchHistory() {
   if (!ui.matchHistoryDialog.open) return;
   const bounds = ui.matchHistoryButton.getBoundingClientRect();
-  const width = Math.min(420, window.innerWidth - 24);
+  const width = Math.min(380, window.innerWidth - 24);
   const left = Math.max(12, Math.min(bounds.right - width, window.innerWidth - width - 12));
   const top = Math.max(12, Math.min(bounds.bottom + 8, window.innerHeight - 180));
   ui.matchHistoryDialog.style.width = `${width}px`;
@@ -780,7 +791,8 @@ ui.completedMatchList.addEventListener("click", (event) => {
   }
 
   if (button.dataset.action === "delete-match") {
-    if (!window.confirm(`${getChampionName(match.championId)}의 ${resultLabel(match.result)} 기록을 삭제할까요?`)) return;
+    const gameNumber = getOrderedMatches().findIndex((item) => item.id === match.id) + 1;
+    if (!window.confirm(`${gameNumber}경기의 기록을 삭제할까요?`)) return;
     state.history = [];
     state.matchState.matches.splice(matchIndex, 1);
     const key = match.result === "win" ? "wins" : "losses";
@@ -790,6 +802,17 @@ ui.completedMatchList.addEventListener("click", (event) => {
     saveGameState();
     renderGameState();
     showToast("경기 기록을 삭제했습니다.");
+  }
+});
+
+const pageMenu = document.querySelector(".page-menu");
+document.addEventListener("pointerdown", (event) => {
+  if (pageMenu.open && !pageMenu.contains(event.target)) pageMenu.open = false;
+});
+pageMenu.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    pageMenu.open = false;
+    pageMenu.querySelector("summary").focus();
   }
 });
 
