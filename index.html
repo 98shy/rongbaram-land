@@ -7,7 +7,7 @@
     <title>룽바람 랜드 | Rongbraram Land</title>
     <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
     <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=31" />
+    <link rel="stylesheet" href="styles.css?v=32" />
     <script src="app.js?v=9" defer></script>
   </head>
   <body>
@@ -183,13 +183,12 @@
     <dialog id="matchHistoryDialog" class="match-dialog" aria-labelledby="matchHistoryTitle">
       <div class="match-dialog__header">
         <div>
-          <span>GAME HISTORY</span>
           <h2 id="matchHistoryTitle">전적 기록</h2>
         </div>
         <button id="matchHistoryCloseButton" class="match-dialog__close" type="button" aria-label="전적 기록 닫기">×</button>
       </div>
       <div class="match-dialog__body">
-        <section class="match-dialog__section" aria-labelledby="pendingMatchTitle">
+        <section class="match-dialog__section" aria-labelledby="pendingMatchTitle" hidden>
           <div class="match-dialog__section-title">
             <h3 id="pendingMatchTitle">매핑 대기</h3>
             <span id="pendingMatchCount">0개</span>
