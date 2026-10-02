@@ -111,16 +111,30 @@ function renderBalanceSummary(records) {
   const groups = new Map();
   records.forEach((record) => {
     const balance = getBalance(record).trim() || "미입력";
-    if (!groups.has(balance)) groups.set(balance, { balance, lands: 0, wins: 0, losses: 0, settlement: 0 });
+    if (!groups.has(balance)) groups.set(balance, {
+      balance,
+      landWins: 0,
+      landDraws: 0,
+      landLosses: 0,
+      wins: 0,
+      losses: 0,
+      settlement: 0,
+      records: [],
+    });
     const group = groups.get(balance);
     const wins = Math.max(0, Number.parseInt(record.wins, 10) || 0);
     const losses = Math.max(0, Number.parseInt(record.losses, 10) || 0);
     const stake = Math.max(0, Number.parseInt(record.stake, 10) || 0);
     const storedSettlement = Number(record.settlement);
-    group.lands += 1;
+    const settlement = Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
+    const landResult = wins > losses ? "win" : wins < losses ? "loss" : "draw";
+    if (landResult === "win") group.landWins += 1;
+    else if (landResult === "loss") group.landLosses += 1;
+    else group.landDraws += 1;
     group.wins += wins;
     group.losses += losses;
-    group.settlement += Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
+    group.settlement += settlement;
+    group.records.push({ createdAt: record.createdAt, wins, losses, settlement, landResult });
   });
 
   const fragment = document.createDocumentFragment();
@@ -128,16 +142,49 @@ function renderBalanceSummary(records) {
     if (a.balance === "미입력") return 1;
     if (b.balance === "미입력") return -1;
     return a.balance.localeCompare(b.balance, "ko");
-  }).forEach((group) => {
+  }).forEach((group, groupIndex) => {
+    const summaryGroup = document.createElement("div");
+    summaryGroup.className = "history-summary__group";
     const row = document.createElement("div");
     row.className = "history-summary__row";
-    const balance = createTextValue(group.balance);
-    const lands = createTextValue(`${group.lands}회`);
+    const balance = document.createElement("button");
+    balance.type = "button";
+    balance.className = "history-summary__balance";
+    balance.dataset.action = "toggle-balance-results";
+    balance.setAttribute("aria-expanded", "false");
+    const detailId = `balance-results-${groupIndex}`;
+    balance.setAttribute("aria-controls", detailId);
+    const arrow = document.createElement("span");
+    arrow.className = "history-summary__arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    const balanceName = createTextValue(group.balance);
+    balance.append(arrow, balanceName);
+    const lands = createTextValue(`${group.landWins}승 ${group.landDraws}무 ${group.landLosses}패`);
     const record = createTextValue(`${group.wins}승 ${group.losses}패`);
     const settlementClass = group.settlement > 0 ? "is-positive" : group.settlement < 0 ? "is-negative" : "";
     const settlement = createTextValue(formatSettlement(group.settlement), settlementClass);
     row.append(balance, lands, record, settlement);
-    fragment.append(row);
+
+    const details = document.createElement("div");
+    details.id = detailId;
+    details.className = "history-summary__details";
+    details.hidden = true;
+    group.records.slice().sort((a, b) => Number(b.createdAt) - Number(a.createdAt)).forEach((item) => {
+      const detail = document.createElement("div");
+      detail.className = "history-summary__detail";
+      const date = document.createElement("span");
+      date.textContent = displayDate(item.createdAt).replace("\n", " · ");
+      const score = createTextValue(`${item.wins}승 ${item.losses}패`);
+      const result = document.createElement("strong");
+      result.className = `history-summary__result history-summary__result--${item.landResult}`;
+      result.textContent = item.landResult === "win" ? "승" : item.landResult === "loss" ? "패" : "무";
+      const detailSettlementClass = item.settlement > 0 ? "is-positive" : item.settlement < 0 ? "is-negative" : "";
+      const detailSettlement = createTextValue(formatSettlement(item.settlement), detailSettlementClass);
+      detail.append(date, score, result, detailSettlement);
+      details.append(detail);
+    });
+    summaryGroup.append(row, details);
+    fragment.append(summaryGroup);
   });
 
   if (!groups.size) {
@@ -148,6 +195,17 @@ function renderBalanceSummary(records) {
   }
   ui.balanceSummary.replaceChildren(fragment);
 }
+
+ui.balanceSummary.addEventListener("click", (event) => {
+  const button = event.target.closest('[data-action="toggle-balance-results"]');
+  if (!button) return;
+  const group = button.closest(".history-summary__group");
+  const details = group.querySelector(".history-summary__details");
+  const willOpen = details.hidden;
+  details.hidden = !willOpen;
+  group.classList.toggle("is-open", willOpen);
+  button.setAttribute("aria-expanded", String(willOpen));
+});
 
 function renderHistory() {
   const records = readLandRecords();
