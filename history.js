@@ -5,8 +5,7 @@ const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const ui = {
   list: document.querySelector("#historyList"),
   empty: document.querySelector("#historyEmpty"),
-  totalRecord: document.querySelector("#historyTotalRecord"),
-  totalSettlement: document.querySelector("#historyTotalSettlement"),
+  balanceSummary: document.querySelector("#historyBalanceSummary"),
   updatedAt: document.querySelector("#historyUpdatedAt"),
   close: document.querySelector("#historyCloseButton"),
 };
@@ -108,11 +107,50 @@ function renderLatestSavedAt(records) {
     : "최근 저장 기록 없음";
 }
 
+function renderBalanceSummary(records) {
+  const groups = new Map();
+  records.forEach((record) => {
+    const balance = getBalance(record).trim() || "미입력";
+    if (!groups.has(balance)) groups.set(balance, { balance, lands: 0, wins: 0, losses: 0, settlement: 0 });
+    const group = groups.get(balance);
+    const wins = Math.max(0, Number.parseInt(record.wins, 10) || 0);
+    const losses = Math.max(0, Number.parseInt(record.losses, 10) || 0);
+    const stake = Math.max(0, Number.parseInt(record.stake, 10) || 0);
+    const storedSettlement = Number(record.settlement);
+    group.lands += 1;
+    group.wins += wins;
+    group.losses += losses;
+    group.settlement += Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
+  });
+
+  const fragment = document.createDocumentFragment();
+  [...groups.values()].sort((a, b) => {
+    if (a.balance === "미입력") return 1;
+    if (b.balance === "미입력") return -1;
+    return a.balance.localeCompare(b.balance, "ko");
+  }).forEach((group) => {
+    const row = document.createElement("div");
+    row.className = "history-summary__row";
+    const balance = createTextValue(group.balance);
+    const lands = createTextValue(`${group.lands}회`);
+    const record = createTextValue(`${group.wins}승 ${group.losses}패`);
+    const settlementClass = group.settlement > 0 ? "is-positive" : group.settlement < 0 ? "is-negative" : "";
+    const settlement = createTextValue(formatSettlement(group.settlement), settlementClass);
+    row.append(balance, lands, record, settlement);
+    fragment.append(row);
+  });
+
+  if (!groups.size) {
+    const empty = document.createElement("p");
+    empty.className = "history-summary__empty";
+    empty.textContent = "저장된 밸런스 전적이 없습니다.";
+    fragment.append(empty);
+  }
+  ui.balanceSummary.replaceChildren(fragment);
+}
+
 function renderHistory() {
   const records = readLandRecords();
-  let totalWins = 0;
-  let totalLosses = 0;
-  let totalSettlement = 0;
   const fragment = document.createDocumentFragment();
 
   records.slice().sort((a, b) => Number(b.createdAt) - Number(a.createdAt)).forEach((record) => {
@@ -121,10 +159,6 @@ function renderHistory() {
     const stake = Math.max(0, Number.parseInt(record.stake, 10) || 0);
     const storedSettlement = Number(record.settlement);
     const settlement = Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
-    totalWins += wins;
-    totalLosses += losses;
-    totalSettlement += settlement;
-
     const row = document.createElement("article");
     row.className = "history-row";
     row.dataset.recordId = recordKey(record);
@@ -195,10 +229,7 @@ function renderHistory() {
 
   ui.list.replaceChildren(fragment);
   ui.empty.hidden = records.length !== 0;
-  ui.totalRecord.textContent = `${totalWins}승 ${totalLosses}패`;
-  ui.totalSettlement.textContent = formatSettlement(totalSettlement);
-  ui.totalSettlement.classList.toggle("is-positive", totalSettlement > 0);
-  ui.totalSettlement.classList.toggle("is-negative", totalSettlement < 0);
+  renderBalanceSummary(records);
   renderLatestSavedAt(records);
 }
 
@@ -229,6 +260,7 @@ ui.list.addEventListener("click", (event) => {
     row.querySelector(".history-balance").replaceChildren(createBalanceText(balance));
     button.dataset.action = "edit-balance";
     button.textContent = "수정";
+    renderBalanceSummary(records);
     renderLatestSavedAt(records);
     return;
   }

@@ -6,8 +6,8 @@
     <meta name="description" content="룽바람 랜드에서 저장한 날짜별 전적" />
     <title>랜드 전적 | Land Records</title>
     <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
-    <link rel="stylesheet" href="styles.css?v=47" />
-    <script src="history.js?v=7" defer></script>
+    <link rel="stylesheet" href="styles.css?v=48" />
+    <script src="history.js?v=8" defer></script>
   </head>
   <body class="history-page">
     <main class="history-page__shell">
@@ -20,9 +20,14 @@
         <button id="historyCloseButton" type="button">← 뒤로가기</button>
       </header>
 
-      <section class="history-summary" aria-label="저장된 전체 전적 요약">
-        <div><span>전체 전적</span><strong id="historyTotalRecord">0승 0패</strong></div>
-        <div><span>전체 결산</span><strong id="historyTotalSettlement">0개</strong></div>
+      <section class="history-summary" aria-label="밸런스별 누적 전적 요약">
+        <div class="history-summary__header" aria-hidden="true">
+          <span>밸런스</span>
+          <span>랜드 전적</span>
+          <span>누적 전적</span>
+          <span>누적 결산</span>
+        </div>
+        <div id="historyBalanceSummary" class="history-summary__list"></div>
       </section>
 
       <section class="history-card" aria-label="랜드 전적 목록">
