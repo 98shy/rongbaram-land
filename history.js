@@ -34,7 +34,7 @@ function writeLandRecords(records) {
 }
 
 function recordKey(record) {
-  return String(record.id ?? record.createdAt);
+  return `${String(record.id ?? "record")}:${String(record.createdAt)}`;
 }
 
 function displayDate(timestamp) {
@@ -91,6 +91,23 @@ function createBalanceInput(value = "") {
   return input;
 }
 
+function createBalanceText(value) {
+  const balanceText = document.createElement("strong");
+  balanceText.className = "history-balance__text";
+  balanceText.textContent = value;
+  return balanceText;
+}
+
+function renderLatestSavedAt(records) {
+  const latestSavedAt = records.reduce((latest, record) => {
+    const timestamp = Number(record.updatedAt ?? record.createdAt);
+    return Number.isFinite(timestamp) ? Math.max(latest, timestamp) : latest;
+  }, 0);
+  ui.updatedAt.textContent = latestSavedAt
+    ? `최근 저장 ${new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(latestSavedAt))}`
+    : "최근 저장 기록 없음";
+}
+
 function renderHistory() {
   const records = readLandRecords();
   let totalWins = 0;
@@ -145,10 +162,7 @@ function renderHistory() {
     const balanceField = document.createElement("div");
     balanceField.className = "history-balance";
     if (savedBalance) {
-      const balanceText = document.createElement("strong");
-      balanceText.className = "history-balance__text";
-      balanceText.textContent = savedBalance;
-      balanceField.append(balanceText);
+      balanceField.append(createBalanceText(savedBalance));
     } else {
       balanceField.append(createBalanceInput());
     }
@@ -185,13 +199,7 @@ function renderHistory() {
   ui.totalSettlement.textContent = formatSettlement(totalSettlement);
   ui.totalSettlement.classList.toggle("is-positive", totalSettlement > 0);
   ui.totalSettlement.classList.toggle("is-negative", totalSettlement < 0);
-  const latestSavedAt = records.reduce((latest, record) => {
-    const timestamp = Number(record.updatedAt ?? record.createdAt);
-    return Number.isFinite(timestamp) ? Math.max(latest, timestamp) : latest;
-  }, 0);
-  ui.updatedAt.textContent = latestSavedAt
-    ? `최근 저장 ${new Intl.DateTimeFormat("ko-KR", { hour: "2-digit", minute: "2-digit" }).format(new Date(latestSavedAt))}`
-    : "최근 저장 기록 없음";
+  renderLatestSavedAt(records);
 }
 
 ui.list.addEventListener("input", (event) => {
@@ -218,7 +226,10 @@ ui.list.addEventListener("click", (event) => {
     records[recordIndex].updatedAt = Date.now();
     delete records[recordIndex].opponent;
     if (!writeLandRecords(records)) return window.alert("브라우저 저장 공간을 확인해 주세요.");
-    renderHistory();
+    row.querySelector(".history-balance").replaceChildren(createBalanceText(balance));
+    button.dataset.action = "edit-balance";
+    button.textContent = "수정";
+    renderLatestSavedAt(records);
     return;
   }
 
