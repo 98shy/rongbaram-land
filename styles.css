@@ -531,8 +531,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 .mixer-player.is-suhit { color: #7b5818; background: #fff4d9; border-color: #d1a64d; }
 .mixer-player__stats { display: block; margin-top: 5px; color: #69757a; font-size: 14px; font-weight: 600; line-height: 1.35; }
 .mixer-player__record { display: block; color: #69757a; font-size: 13px; text-align: center; }
-.mixer-player__record.is-win-leading { color: #3378b8; }
-.mixer-player__record.is-loss-leading { color: var(--danger); }
 .mixer-player__settlement { position: absolute; top: 50%; left: 10px; font-size: 14px; transform: translateY(-50%); }
 .mixer-player--b .mixer-player__settlement { right: 10px; left: auto; }
 .mixer-player__stats .is-positive { color: var(--teal); }
