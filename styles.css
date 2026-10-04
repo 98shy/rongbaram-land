@@ -765,6 +765,11 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
   .stream-banner:focus-visible { transform: translateY(-4px); }
 }
 
+@media (max-aspect-ratio: 4 / 3) {
+  .stream-banner { display: none; }
+  .page-menu__label { position: absolute; left: 50%; transform: translateX(-50%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }

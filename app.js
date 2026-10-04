@@ -5,6 +5,7 @@ const RECORD_STORAGE_KEY = "lol-champion-tracker:record-v1";
 const MATCH_STORAGE_KEY = "lol-champion-tracker:matches-v1";
 const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const MIXER_STORAGE_KEY = "rongbaram-land:team-mixer-v1";
+const TEAM_EVENTS_STORAGE_KEY = "rongbaram-land:pending-team-events-v1";
 const CHAMPION_ALIASES = {
   Morgana: ["몰가"],
   Pantheon: ["빵테"],
@@ -154,14 +155,76 @@ function readLandRecords() {
   }
 }
 
-function readConfirmedMixerResult() {
+function readMixerMapping() {
   try {
     const saved = JSON.parse(localStorage.getItem(MIXER_STORAGE_KEY));
-    if (!Array.isArray(saved?.confirmedResult) || saved.confirmedResult.length !== 5) return [];
-    const result = saved.confirmedResult.map((pair) => [String(pair?.[0] ?? "").trim(), String(pair?.[1] ?? "").trim()]);
-    return result.every((pair) => pair[0] && pair[1]) ? result : [];
+    return saved && typeof saved === "object" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+function validMixerTeams(value) {
+  if (!Array.isArray(value) || value.length !== 5) return [];
+  const teams = value.map((pair) => [String(pair?.[0] ?? "").trim(), String(pair?.[1] ?? "").trim()]);
+  return teams.every((pair) => pair[0] && pair[1]) ? teams : [];
+}
+
+function readPendingTeamEvents() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TEAM_EVENTS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
+  }
+}
+
+function savePendingTeamEvents(events) {
+  localStorage.setItem(TEAM_EVENTS_STORAGE_KEY, JSON.stringify(events));
+}
+
+function consumeMixerAssignment(result) {
+  const mapping = readMixerMapping();
+  const teams = validMixerTeams(mapping?.confirmedResult);
+  if (!mapping?.armed || !teams.length) return;
+  const events = readPendingTeamEvents();
+  events.push({
+    id: createMatchId(),
+    result,
+    recordCount: result === "win" ? state.record.wins : state.record.losses,
+    stake: state.record.stake,
+    createdAt: Date.now(),
+    teamResult: teams,
+  });
+  savePendingTeamEvents(events);
+  mapping.armed = false;
+  localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
+}
+
+function revokeMixerAssignment(result, recordCount) {
+  const events = readPendingTeamEvents();
+  const index = events.findLastIndex((event) =>
+    event?.result === result && Number(event?.recordCount) === recordCount
+  );
+  if (index < 0) return;
+  const [removed] = events.splice(index, 1);
+  savePendingTeamEvents(events);
+  const mapping = readMixerMapping();
+  if (!mapping) return;
+  mapping.confirmedResult = validMixerTeams(removed.teamResult);
+  mapping.armed = true;
+  localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
+}
+
+function clearMixerSessionTracking() {
+  try {
+    savePendingTeamEvents([]);
+    const mapping = readMixerMapping();
+    if (!mapping) return;
+    mapping.armed = false;
+    localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
+  } catch {
+    // 팀 섞기 기록을 사용할 수 없어도 기본 전적 초기화는 계속 진행합니다.
   }
 }
 
@@ -171,6 +234,7 @@ function clearCurrentSession() {
   state.record = { ...state.record, wins: 0, losses: 0 };
   state.matchState = { matches: [], pendingResults: [], pendingChampions: [], replacement: null };
   state.replacingMatchId = null;
+  clearMixerSessionTracking();
   saveGameState();
   renderGameState();
 }
@@ -196,7 +260,7 @@ function saveCurrentLandRecord() {
     stake: state.record.stake,
     settlement: (state.record.wins - state.record.losses) * state.record.stake,
     champions: [...mappedChampions, ...remainingChampions],
-    teamResult: readConfirmedMixerResult(),
+    teamMatches: readPendingTeamEvents(),
   };
   records.push(landRecord);
 
@@ -705,6 +769,7 @@ ui.recordControls.querySelectorAll("[data-record]").forEach((button) => {
     state.history = [];
     if (delta > 0) {
       state.record[key] += 1;
+      consumeMixerAssignment(result);
       state.matchState.pendingResults.push(result);
       const created = attemptMatches();
       saveGameState();
@@ -719,6 +784,7 @@ ui.recordControls.querySelectorAll("[data-record]").forEach((button) => {
     }
 
     if (state.record[key] === 0) return;
+    revokeMixerAssignment(result, state.record[key]);
     let message = `${resultLabel(result)} 1회를 취소했습니다.`;
     if (state.matchState.replacement?.result === result) {
       state.matchState.replacement = null;

@@ -1,6 +1,6 @@
 const MIXER_STORAGE_KEY = "rongbaram-land:team-mixer-v1";
 const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
-const CURRENT_RECORD_STORAGE_KEY = "lol-champion-tracker:record-v1";
+const TEAM_EVENTS_STORAGE_KEY = "rongbaram-land:pending-team-events-v1";
 const PAIR_COUNT = 5;
 const SUHIT_ALIASES = new Set(["수힛", "수히"]);
 
@@ -43,7 +43,12 @@ function normalizedResult(value) {
 }
 
 function readMixerState() {
-  const fallback = { pairs: emptyPairs(), result: [], confirmedResult: [] };
+  const fallback = {
+    pairs: emptyPairs(),
+    result: [],
+    confirmedResult: [],
+    armed: false,
+  };
   try {
     const saved = JSON.parse(localStorage.getItem(MIXER_STORAGE_KEY));
     if (!saved || !Array.isArray(saved.pairs)) return fallback;
@@ -56,6 +61,7 @@ function readMixerState() {
       pairs,
       result: normalizedResult(saved.result),
       confirmedResult: normalizedResult(saved.confirmedResult),
+      armed: saved.armed === true,
     };
   } catch {
     return fallback;
@@ -79,12 +85,12 @@ function readLandRecords() {
   }
 }
 
-function readCurrentRecord() {
+function readPendingTeamEvents() {
   try {
-    const saved = JSON.parse(localStorage.getItem(CURRENT_RECORD_STORAGE_KEY));
-    return saved && typeof saved === "object" ? saved : null;
+    const saved = JSON.parse(localStorage.getItem(TEAM_EVENTS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
   } catch {
-    return null;
+    return [];
   }
 }
 
@@ -120,14 +126,38 @@ function addParticipantRecord(stats, target, record, teamResult) {
 function participantStats(name) {
   const target = canonicalParticipant(name);
   const stats = readLandRecords().reduce(
-    (totals, record) =>
-      addParticipantRecord(totals, target, record, record?.teamResult),
+    (totals, record) => {
+      if (Array.isArray(record?.teamMatches)) {
+        record.teamMatches.forEach((match) => {
+          addParticipantRecord(
+            totals,
+            target,
+            {
+              wins: match?.result === "win" ? 1 : 0,
+              losses: match?.result === "loss" ? 1 : 0,
+              stake: match?.stake,
+            },
+            match?.teamResult,
+          );
+        });
+        return totals;
+      }
+      return addParticipantRecord(totals, target, record, record?.teamResult);
+    },
     { wins: 0, losses: 0, settlement: 0 },
   );
-  const currentRecord = readCurrentRecord();
-  if (currentRecord) {
-    addParticipantRecord(stats, target, currentRecord, state.confirmedResult);
-  }
+  readPendingTeamEvents().forEach((match) => {
+    addParticipantRecord(
+      stats,
+      target,
+      {
+        wins: match?.result === "win" ? 1 : 0,
+        losses: match?.result === "loss" ? 1 : 0,
+        stake: match?.stake,
+      },
+      match?.teamResult,
+    );
+  });
   return stats;
 }
 
@@ -255,6 +285,7 @@ ui.pairs.addEventListener("input", (event) => {
   const participantIndex = Number(input.dataset.participant);
   state.pairs[pairIndex][participantIndex] = input.value;
   state.result = [];
+  state.armed = false;
   saveMixerState();
   renderResult();
   setStatus("");
@@ -266,6 +297,7 @@ ui.shuffle.addEventListener("click", () => {
   state.result = state.pairs.map(([first, second]) =>
     randomSwap() ? [second.trim(), first.trim()] : [first.trim(), second.trim()]
   );
+  state.armed = false;
   saveMixerState();
   renderResult();
   setStatus("팀 섞기 완료");
@@ -292,6 +324,7 @@ async function copyResult() {
 
 ui.complete.addEventListener("click", async () => {
   state.confirmedResult = state.result.map((pair) => [...pair]);
+  state.armed = true;
   saveMixerState();
   renderResult();
   await copyResult();
@@ -299,7 +332,12 @@ ui.complete.addEventListener("click", async () => {
 });
 
 ui.reset.addEventListener("click", () => {
-  state = { pairs: emptyPairs(), result: [], confirmedResult: [] };
+  state = {
+    pairs: emptyPairs(),
+    result: [],
+    confirmedResult: [],
+    armed: false,
+  };
   saveMixerState();
   createPairInputs();
   renderResult();
@@ -307,9 +345,11 @@ ui.reset.addEventListener("click", () => {
 });
 
 window.addEventListener("storage", (event) => {
+  if (event.key === MIXER_STORAGE_KEY) state = readMixerState();
   if (
     event.key === LAND_RECORDS_STORAGE_KEY ||
-    event.key === CURRENT_RECORD_STORAGE_KEY
+    event.key === TEAM_EVENTS_STORAGE_KEY ||
+    event.key === MIXER_STORAGE_KEY
   ) renderResult();
 });
 
