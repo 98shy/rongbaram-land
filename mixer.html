@@ -4,14 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="다섯 밸런스 조합을 두 팀으로 무작위 배치하는 룽바람 랜드 팀 섞기" />
-    <title>팀 섞기 | Rongbaram Team Mixer</title>
+    <title>팀 섞기 | Team Mixer</title>
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=1" />
-    <link rel="stylesheet" href="styles.css?v=62" />
-    <script src="mixer.js?v=2" defer></script>
+    <link rel="stylesheet" href="styles.css?v=63" />
+    <script src="mixer.js?v=4" defer></script>
   </head>
   <body class="mixer-page">
     <main class="mixer-page__shell">
+      <div class="mixer-layout">
       <section class="mixer-card mixer-entry" aria-labelledby="mixerEntryTitle">
         <div class="mixer-card__heading">
           <div>
@@ -37,14 +38,13 @@
         <div class="mixer-card__heading">
           <div>
             <h2 id="mixerResultTitle">5대5 배치 결과</h2>
-            <p>수힛 또는 수히가 포함된 밸런스는 저장된 상대 전적을 함께 표시합니다.</p>
           </div>
         </div>
 
         <div class="mixer-result__header" aria-hidden="true">
-          <span>A팀</span>
+          <span>블루</span>
           <span>VS</span>
-          <span>B팀</span>
+          <span>레드</span>
         </div>
         <div id="mixerResultList" class="mixer-result__list"></div>
         <div id="mixerEmpty" class="mixer-empty">
@@ -52,6 +52,7 @@
           <p>열 명의 이름을 입력한 뒤 팀 섞기 버튼을 눌러주세요.</p>
         </div>
       </section>
+      </div>
 
       <p class="mixer-page__notice">입력한 이름과 최근 배치 결과는 현재 브라우저에 자동 저장됩니다.</p>
     </main>

@@ -1,5 +1,5 @@
-const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const MIXER_STORAGE_KEY = "rongbaram-land:team-mixer-v1";
+const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const PAIR_COUNT = 5;
 const SUHIT_ALIASES = new Set(["수힛", "수히"]);
 
@@ -32,8 +32,14 @@ function emptyPairs() {
   return Array.from({ length: PAIR_COUNT }, () => ["", ""]);
 }
 
+function normalizedResult(value) {
+  if (!Array.isArray(value)) return [];
+  const result = value.slice(0, PAIR_COUNT).map((pair) => [String(pair?.[0] ?? ""), String(pair?.[1] ?? "")]);
+  return result.length === PAIR_COUNT ? result : [];
+}
+
 function readMixerState() {
-  const fallback = { pairs: emptyPairs(), result: [] };
+  const fallback = { pairs: emptyPairs(), result: [], confirmedResult: [] };
   try {
     const saved = JSON.parse(localStorage.getItem(MIXER_STORAGE_KEY));
     if (!saved || !Array.isArray(saved.pairs)) return fallback;
@@ -42,10 +48,11 @@ function readMixerState() {
       if (!Array.isArray(savedPair)) return pair;
       return [String(savedPair[0] ?? ""), String(savedPair[1] ?? "")];
     });
-    const result = Array.isArray(saved.result)
-      ? saved.result.slice(0, PAIR_COUNT).map((pair) => [String(pair?.[0] ?? ""), String(pair?.[1] ?? "")])
-      : [];
-    return { pairs, result: result.length === PAIR_COUNT ? result : [] };
+    return {
+      pairs,
+      result: normalizedResult(saved.result),
+      confirmedResult: normalizedResult(saved.confirmedResult),
+    };
   } catch {
     return fallback;
   }
@@ -61,31 +68,35 @@ function saveMixerState() {
 
 function readLandRecords() {
   try {
-    const records = JSON.parse(localStorage.getItem(LAND_RECORDS_STORAGE_KEY));
-    return Array.isArray(records) ? records : [];
+    const saved = JSON.parse(localStorage.getItem(LAND_RECORDS_STORAGE_KEY));
+    return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
   }
 }
 
-function recordBalance(record) {
-  if (typeof record?.balance === "string") return record.balance;
-  return typeof record?.opponent === "string" ? record.opponent : "";
-}
-
-function opponentStats(opponent) {
-  const target = normalizeName(opponent);
-  if (!target) return null;
-  const matched = readLandRecords().filter((record) => normalizeName(recordBalance(record)) === target);
-  if (!matched.length) return null;
-  return matched.reduce((stats, record) => {
+function participantStats(name) {
+  const target = canonicalParticipant(name);
+  return readLandRecords().reduce((stats, record) => {
+    const teams = normalizedResult(record?.teamResult);
+    if (!teams.length) return stats;
+    const blue = teams.map((pair) => pair[0]);
+    const red = teams.map((pair) => pair[1]);
+    const suhitIsBlue = blue.some(isSuhit);
+    const suhitIsRed = red.some(isSuhit);
+    if (suhitIsBlue === suhitIsRed) return stats;
+    const participantIsBlue = blue.some((player) => canonicalParticipant(player) === target);
+    const participantIsRed = red.some((player) => canonicalParticipant(player) === target);
+    if (participantIsBlue === participantIsRed) return stats;
+    const sameTeam = participantIsBlue === suhitIsBlue;
     const wins = Math.max(0, Number.parseInt(record.wins, 10) || 0);
     const losses = Math.max(0, Number.parseInt(record.losses, 10) || 0);
     const stake = Math.max(0, Number.parseInt(record.stake, 10) || 0);
     const storedSettlement = Number(record.settlement);
-    stats.wins += wins;
-    stats.losses += losses;
-    stats.settlement += Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
+    const settlement = Number.isFinite(storedSettlement) ? storedSettlement : (wins - losses) * stake;
+    stats.wins += sameTeam ? wins : losses;
+    stats.losses += sameTeam ? losses : wins;
+    stats.settlement += sameTeam ? settlement : -settlement;
     return stats;
   }, { wins: 0, losses: 0, settlement: 0 });
 }
@@ -132,35 +143,23 @@ function createPairInputs() {
 }
 
 function createPlayer(name, team, highlighted) {
-  const player = document.createElement("strong");
+  const player = document.createElement("div");
   player.className = `mixer-player mixer-player--${team}`;
   if (highlighted) player.classList.add("is-suhit");
-  player.textContent = name;
+  const playerName = document.createElement("strong");
+  playerName.textContent = name;
+  const stats = participantStats(name);
+  const statsBox = document.createElement("span");
+  statsBox.className = "mixer-player__stats";
+  const record = document.createElement("span");
+  record.textContent = `현재 전적 ${stats.wins}승 ${stats.losses}패`;
+  const settlement = document.createElement("span");
+  settlement.textContent = `최종 결산 ${formatSettlement(stats.settlement)}`;
+  if (stats.settlement > 0) settlement.className = "is-positive";
+  if (stats.settlement < 0) settlement.className = "is-negative";
+  statsBox.append(record, settlement);
+  player.append(playerName, statsBox);
   return player;
-}
-
-function createHistoryNote(left, right) {
-  const suhitSide = isSuhit(left) ? "a" : isSuhit(right) ? "b" : "";
-  if (!suhitSide) return null;
-  const opponent = suhitSide === "a" ? right : left;
-  const stats = opponentStats(opponent);
-  const note = document.createElement("div");
-  note.className = `mixer-history mixer-history--${suhitSide}`;
-  const teamName = suhitSide === "a" ? "A팀" : "B팀";
-  if (!stats) {
-    note.textContent = `${teamName} 수힛 기준 · ${opponent} 상대 저장 전적 없음`;
-    return note;
-  }
-  const settlementClass = stats.settlement > 0 ? "is-positive" : stats.settlement < 0 ? "is-negative" : "";
-  const prefix = document.createElement("span");
-  prefix.textContent = `${teamName} 수힛 기준 · ${opponent} 상대 `;
-  const score = document.createElement("strong");
-  score.textContent = `${stats.wins}승 ${stats.losses}패`;
-  const settlement = document.createElement("strong");
-  settlement.className = settlementClass;
-  settlement.textContent = formatSettlement(stats.settlement);
-  note.append(prefix, score, document.createTextNode(" · "), settlement);
-  return note;
 }
 
 function renderResult() {
@@ -186,8 +185,6 @@ function renderResult() {
     versus.textContent = "VS";
     matchup.append(createPlayer(left, "a", isSuhit(left)), versus, createPlayer(right, "b", isSuhit(right)));
     row.append(number, matchup);
-    const historyNote = createHistoryNote(left, right);
-    if (historyNote) row.append(historyNote);
     fragment.append(row);
   });
   ui.resultList.replaceChildren(fragment);
@@ -252,12 +249,14 @@ async function copyResult() {
 }
 
 ui.complete.addEventListener("click", async () => {
+  state.confirmedResult = state.result.map((pair) => [...pair]);
+  saveMixerState();
   await copyResult();
-  setStatus("팀 섞기 완료 · 결과를 클립보드에 복사했습니다.");
+  setStatus("팀 섞기 완료 · 팀 구성을 기억하고 클립보드에 복사했습니다.");
 });
 
 ui.reset.addEventListener("click", () => {
-  state = { pairs: emptyPairs(), result: [] };
+  state = { pairs: emptyPairs(), result: [], confirmedResult: [] };
   saveMixerState();
   createPairInputs();
   renderResult();

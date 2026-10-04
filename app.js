@@ -4,6 +4,7 @@ const STORAGE_KEY = "lol-champion-tracker:used-v1";
 const RECORD_STORAGE_KEY = "lol-champion-tracker:record-v1";
 const MATCH_STORAGE_KEY = "lol-champion-tracker:matches-v1";
 const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
+const MIXER_STORAGE_KEY = "rongbaram-land:team-mixer-v1";
 const CHAMPION_ALIASES = {
   Morgana: ["몰가"],
   Pantheon: ["빵테"],
@@ -153,6 +154,17 @@ function readLandRecords() {
   }
 }
 
+function readConfirmedMixerResult() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MIXER_STORAGE_KEY));
+    if (!Array.isArray(saved?.confirmedResult) || saved.confirmedResult.length !== 5) return [];
+    const result = saved.confirmedResult.map((pair) => [String(pair?.[0] ?? "").trim(), String(pair?.[1] ?? "").trim()]);
+    return result.every((pair) => pair[0] && pair[1]) ? result : [];
+  } catch {
+    return [];
+  }
+}
+
 function clearCurrentSession() {
   state.history = [];
   state.used.clear();
@@ -176,7 +188,7 @@ function saveCurrentLandRecord() {
     .filter((id) => !includedIds.has(id))
     .map((id) => ({ id, result: null }));
   const records = readLandRecords();
-  records.push({
+  const landRecord = {
     id: createMatchId(),
     createdAt: Date.now(),
     wins: state.record.wins,
@@ -184,7 +196,9 @@ function saveCurrentLandRecord() {
     stake: state.record.stake,
     settlement: (state.record.wins - state.record.losses) * state.record.stake,
     champions: [...mappedChampions, ...remainingChampions],
-  });
+    teamResult: readConfirmedMixerResult(),
+  };
+  records.push(landRecord);
 
   try {
     localStorage.setItem(LAND_RECORDS_STORAGE_KEY, JSON.stringify(records));
