@@ -152,11 +152,13 @@ function createPlayer(name, team, highlighted) {
   const statsBox = document.createElement("span");
   statsBox.className = "mixer-player__stats";
   const record = document.createElement("span");
-  record.textContent = `현재 전적 ${stats.wins}승 ${stats.losses}패`;
+  record.className = "mixer-player__record";
+  record.textContent = `${stats.wins}승 ${stats.losses}패`;
   const settlement = document.createElement("span");
-  settlement.textContent = `최종 결산 ${formatSettlement(stats.settlement)}`;
-  if (stats.settlement > 0) settlement.className = "is-positive";
-  if (stats.settlement < 0) settlement.className = "is-negative";
+  settlement.className = "mixer-player__settlement";
+  settlement.textContent = formatSettlement(stats.settlement);
+  if (stats.settlement > 0) settlement.classList.add("is-positive");
+  if (stats.settlement < 0) settlement.classList.add("is-negative");
   statsBox.append(record, settlement);
   player.append(playerName, statsBox);
   return player;
@@ -252,7 +254,7 @@ ui.complete.addEventListener("click", async () => {
   state.confirmedResult = state.result.map((pair) => [...pair]);
   saveMixerState();
   await copyResult();
-  setStatus("팀 섞기 완료 · 팀 구성을 기억하고 클립보드에 복사했습니다.");
+  setStatus("팀 기억을 완료했습니다.");
 });
 
 ui.reset.addEventListener("click", () => {
