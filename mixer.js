@@ -300,7 +300,7 @@ ui.shuffle.addEventListener("click", () => {
   state.armed = false;
   saveMixerState();
   renderResult();
-  setStatus("팀 섞기 완료");
+  setStatus("팀 섞기를 완료했습니다.");
 });
 
 async function copyResult() {
@@ -328,7 +328,7 @@ ui.complete.addEventListener("click", async () => {
   saveMixerState();
   renderResult();
   await copyResult();
-  setStatus("팀 기억을 완료했습니다.");
+  setStatus("팀을 저장했습니다.");
 });
 
 ui.reset.addEventListener("click", () => {
