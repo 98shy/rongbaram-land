@@ -217,6 +217,8 @@ function createPlayer(name, team, highlighted) {
   const record = document.createElement("span");
   record.className = "mixer-player__record";
   record.textContent = `${stats.wins}승 ${stats.losses}패`;
+  if (stats.wins > stats.losses) record.classList.add("is-win-leading");
+  if (stats.losses > stats.wins) record.classList.add("is-loss-leading");
   const settlement = document.createElement("span");
   settlement.className = "mixer-player__settlement";
   settlement.textContent = formatSettlement(stats.settlement);
