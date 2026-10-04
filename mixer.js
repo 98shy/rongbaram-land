@@ -8,9 +8,8 @@ const ui = {
   resultList: document.querySelector("#mixerResultList"),
   empty: document.querySelector("#mixerEmpty"),
   shuffle: document.querySelector("#mixerShuffleButton"),
-  copy: document.querySelector("#mixerCopyButton"),
+  complete: document.querySelector("#mixerCompleteButton"),
   reset: document.querySelector("#mixerResetButton"),
-  close: document.querySelector("#mixerCloseButton"),
   status: document.querySelector("#mixerStatus"),
 };
 
@@ -118,7 +117,7 @@ function createPairInputs() {
       input.type = "text";
       input.maxLength = 24;
       input.autocomplete = "off";
-      input.placeholder = `이름 ${pairIndex * 2 + participantIndex + 1}`;
+      input.placeholder = "이름";
       input.value = value;
       input.dataset.pair = String(pairIndex);
       input.dataset.participant = String(participantIndex);
@@ -167,7 +166,7 @@ function createHistoryNote(left, right) {
 function renderResult() {
   const hasResult = state.result.length === PAIR_COUNT;
   ui.empty.hidden = hasResult;
-  ui.copy.disabled = !hasResult;
+  ui.complete.disabled = !hasResult;
   if (!hasResult) {
     ui.resultList.replaceChildren();
     return;
@@ -232,7 +231,7 @@ ui.shuffle.addEventListener("click", () => {
   );
   saveMixerState();
   renderResult();
-  setStatus("두 팀을 5대5로 섞었습니다.");
+  setStatus("팀 섞기 완료");
 });
 
 async function copyResult() {
@@ -250,10 +249,12 @@ async function copyResult() {
     document.execCommand("copy");
     textarea.remove();
   }
-  setStatus("다섯 개의 밸런스 결과를 복사했습니다.");
 }
 
-ui.copy.addEventListener("click", copyResult);
+ui.complete.addEventListener("click", async () => {
+  await copyResult();
+  setStatus("팀 섞기 완료 · 결과를 클립보드에 복사했습니다.");
+});
 
 ui.reset.addEventListener("click", () => {
   state = { pairs: emptyPairs(), result: [] };
@@ -261,13 +262,6 @@ ui.reset.addEventListener("click", () => {
   createPairInputs();
   renderResult();
   setStatus("입력과 배치 결과를 초기화했습니다.");
-});
-
-ui.close.addEventListener("click", () => {
-  window.close();
-  window.setTimeout(() => {
-    if (!window.closed) window.location.href = "index.html";
-  }, 120);
 });
 
 window.addEventListener("storage", (event) => {

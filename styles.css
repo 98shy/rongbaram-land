@@ -488,21 +488,13 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 /* Team mixer page */
 .mixer-page { min-height: 100vh; background: radial-gradient(circle at 12% 0%, rgba(48, 119, 146, .13), transparent 32rem), radial-gradient(circle at 88% 8%, rgba(200, 150, 55, .1), transparent 28rem), var(--paper); }
 .mixer-page__shell { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0; }
-.mixer-page__header { display: flex; align-items: center; justify-content: space-between; min-height: 132px; gap: 24px; padding: 24px 28px; color: #fff; background-color: #102638; background-image: linear-gradient(90deg, rgba(6, 20, 36, .84), rgba(6, 20, 36, .28) 46%, rgba(6, 20, 36, .74)), url("assets/history-header.jpg"); background-position: center; background-size: cover; border: 1px solid rgba(227, 185, 93, .45); box-shadow: var(--shadow); }
-.mixer-page__header h1 { margin: 0; font-size: 30px; }
-.mixer-page__header p { margin: 7px 0 0; color: #d6e0e3; font-size: 12px; }
-.mixer-page__header button { flex: 0 0 auto; padding: 10px 14px; color: #ffe09a; background: rgba(5, 18, 31, .82); border: 1px solid rgba(244, 196, 87, .9); border-radius: 3px; box-shadow: 0 5px 18px rgba(0, 0, 0, .28); cursor: pointer; font-size: 11px; font-weight: 800; }
-.mixer-page__header button:hover,
-.mixer-page__header button:focus-visible { color: var(--navy); background: var(--gold-bright); outline: none; }
 .mixer-card { margin-top: 16px; padding: 22px; background: rgba(255, 253, 248, .96); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.mixer-entry { margin-top: 0; }
 .mixer-card__heading { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-bottom: 18px; }
 .mixer-card__heading h2 { margin: 0; font-size: 18px; }
 .mixer-card__heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
 .mixer-card__heading > span { flex: 0 0 auto; color: #8b641f; font-size: 11px; font-weight: 800; }
-.mixer-entry__header,
 .mixer-pair { display: grid; grid-template-columns: 92px minmax(0, 1fr) 42px minmax(0, 1fr); align-items: center; gap: 12px; }
-.mixer-entry__header { padding: 0 14px 8px; color: var(--muted); font-size: 10px; font-weight: 800; }
-.mixer-entry__header span:nth-child(3) { text-align: center; }
 .mixer-pairs { display: grid; gap: 7px; }
 .mixer-pair { padding: 10px 14px; background: #f5f2eb; border: 1px solid #ded8cc; }
 .mixer-pair > strong { font-size: 12px; }
@@ -516,7 +508,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 .mixer-button { min-height: 36px; padding: 0 15px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: 800; }
 .mixer-button--primary { color: #fff; background: var(--navy); border: 1px solid var(--navy); }
 .mixer-button--secondary { color: #69757a; background: transparent; border: 1px solid #cfc8bb; }
-.mixer-button--copy { color: #8b641f; background: rgba(200, 150, 55, .08); border: 1px solid rgba(200, 150, 55, .62); }
+.mixer-button--complete { color: #7d5715; background: #fff4d9; border: 1px solid rgba(200, 150, 55, .72); }
 .mixer-button:hover:not(:disabled),
 .mixer-button:focus-visible:not(:disabled) { color: #fff; background: var(--gold); border-color: var(--gold); outline: none; }
 .mixer-button:disabled { color: #a4aaad; background: #ece9e2; border-color: #d7d2c8; cursor: default; }
@@ -545,15 +537,13 @@ footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 3
 
 @media (max-width: 760px) {
   .mixer-page__shell { width: min(100% - 24px, 1080px); padding: 14px 0; }
-  .mixer-page__header { align-items: flex-start; flex-direction: column; min-height: 0; padding: 18px; }
   .mixer-card { padding: 14px; }
   .mixer-card__heading { align-items: flex-start; flex-direction: column; gap: 9px; }
-  .mixer-entry__header { display: none; }
   .mixer-pair { grid-template-columns: 1fr 36px 1fr; gap: 7px; padding: 10px; }
   .mixer-pair > strong { grid-column: 1 / -1; }
   .mixer-actions { align-items: stretch; flex-direction: column; }
-  .mixer-actions > div { width: 100%; }
-  .mixer-actions .mixer-button { flex: 1; }
+  .mixer-actions > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+  .mixer-actions .mixer-button { min-width: 0; padding: 0 6px; }
   .mixer-result__header { padding: 0 0 9px; }
   .mixer-result__row { grid-template-columns: 1fr; }
   .mixer-result__number { display: none; }
