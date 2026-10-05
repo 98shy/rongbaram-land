@@ -205,10 +205,9 @@ function createPairInputs() {
   ui.pairs.replaceChildren(fragment);
 }
 
-function createPlayer(name, team, highlighted) {
+function createPlayer(name, team) {
   const player = document.createElement("div");
   player.className = `mixer-player mixer-player--${team}`;
-  if (highlighted) player.classList.add("is-suhit");
   const playerName = document.createElement("strong");
   playerName.textContent = name;
   const stats = participantStats(name);
@@ -249,9 +248,9 @@ function renderResult() {
     versus.className = "mixer-result__versus";
     versus.textContent = "VS";
     matchup.append(
-      createPlayer(left, "a", isSuhit(left)),
+      createPlayer(left, "a"),
       versus,
-      createPlayer(right, "b", isSuhit(right)),
+      createPlayer(right, "b"),
     );
     row.append(number, matchup);
     fragment.append(row);
