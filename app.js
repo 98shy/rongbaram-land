@@ -762,7 +762,7 @@ function initCompactRecord() {
     );
     compactRecord.querySelector("#mixerRecordHint").textContent = mapping?.armed && hasHost
       ? "다음 경기 결과가 팀 전적에 반영됩니다."
-      : "팀 전적에 반영하려면 복사하세요.";
+      : "팀 전적에 반영하려면 경기마다 복사한 뒤 승패를 입력하세요.";
     for (const button of scoreButtons) {
       const count = button.dataset.record === "win" ? wins : losses;
       button.disabled = button.dataset.delta === "-1" && count === 0;
