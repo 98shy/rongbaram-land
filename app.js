@@ -718,6 +718,9 @@ function initCompactRecord() {
   const save = compactRecord.querySelector("#mixerRecordSave");
   const scoreButtons = compactRecord.querySelectorAll("[data-record]");
   const stakeButtons = compactRecord.querySelectorAll("[data-stake-delta]");
+  const stakeTrigger = compactRecord.querySelector("#mixerStake");
+  const stakeDialog = compactRecord.querySelector("#mixerStakeDialog");
+  const stakeValue = compactRecord.querySelector("#mixerStakeValue");
   const settlementLabel = compactRecord.querySelector("#mixerSettlement");
 
   function renderSearch() {
@@ -746,7 +749,9 @@ function initCompactRecord() {
     const { wins, losses, stake } = state.record;
     const settlement = (wins - losses) * stake;
     compactRecord.querySelector("#mixerScore").textContent = `${wins}승 ${losses}패`;
-    compactRecord.querySelector("#mixerStake").textContent = `판당 별풍선 ${stake.toLocaleString("ko-KR")}개`;
+    const formattedStake = `${stake.toLocaleString("ko-KR")}개`;
+    stakeTrigger.textContent = `판당 별풍선 ${formattedStake}`;
+    stakeValue.textContent = formattedStake;
     settlementLabel.textContent = `${settlement > 0 ? "+" : ""}${settlement.toLocaleString("ko-KR")}개`;
     settlementLabel.classList.toggle("is-positive", settlement > 0);
     settlementLabel.classList.toggle("is-negative", settlement < 0);
@@ -826,6 +831,7 @@ function initCompactRecord() {
   for (const button of stakeButtons) {
     button.addEventListener("click", () => changeStake(Number(button.dataset.stakeDelta)));
   }
+  stakeTrigger.addEventListener("click", () => stakeDialog.showModal());
   save.addEventListener("click", saveCurrentLandRecord);
   window.addEventListener("mixer-lineup-change", renderCompactRecord);
   renderCompactRecord();
