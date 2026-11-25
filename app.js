@@ -717,6 +717,8 @@ function initCompactRecord() {
   const retry = compactRecord.querySelector("#mixerChampionRetry");
   const save = compactRecord.querySelector("#mixerRecordSave");
   const scoreButtons = compactRecord.querySelectorAll("[data-record]");
+  const stakeButtons = compactRecord.querySelectorAll("[data-stake-delta]");
+  const settlementLabel = compactRecord.querySelector("#mixerSettlement");
 
   function renderSearch() {
     const query = normalizeSearchText(search.value);
@@ -744,8 +746,10 @@ function initCompactRecord() {
     const { wins, losses, stake } = state.record;
     const settlement = (wins - losses) * stake;
     compactRecord.querySelector("#mixerScore").textContent = `${wins}승 ${losses}패`;
-    compactRecord.querySelector("#mixerStake").textContent = `판당 ${stake.toLocaleString("ko-KR")}개`;
-    compactRecord.querySelector("#mixerSettlement").textContent = `최종 결산 ${settlement > 0 ? "+" : ""}${settlement.toLocaleString("ko-KR")}개`;
+    compactRecord.querySelector("#mixerStake").textContent = `판당 별풍선 ${stake.toLocaleString("ko-KR")}개`;
+    settlementLabel.textContent = `${settlement > 0 ? "+" : ""}${settlement.toLocaleString("ko-KR")}개`;
+    settlementLabel.classList.toggle("is-positive", settlement > 0);
+    settlementLabel.classList.toggle("is-negative", settlement < 0);
     const mapping = readMixerMapping();
     const teams = validMixerTeams(mapping?.confirmedResult);
     const hasHost = teams.flat().some((name) =>
@@ -757,6 +761,9 @@ function initCompactRecord() {
     for (const button of scoreButtons) {
       const count = button.dataset.record === "win" ? wins : losses;
       button.disabled = button.dataset.delta === "-1" && count === 0;
+    }
+    for (const button of stakeButtons) {
+      button.disabled = stake + Number(button.dataset.stakeDelta) < 0;
     }
     save.disabled = wins + losses === 0;
 
@@ -815,6 +822,9 @@ function initCompactRecord() {
   });
   for (const button of scoreButtons) {
     button.addEventListener("click", () => changeRecord(button));
+  }
+  for (const button of stakeButtons) {
+    button.addEventListener("click", () => changeStake(Number(button.dataset.stakeDelta)));
   }
   save.addEventListener("click", saveCurrentLandRecord);
   window.addEventListener("mixer-lineup-change", renderCompactRecord);
@@ -944,18 +954,20 @@ function changeRecord(button) {
   showToast(message);
 }
 
+function changeStake(delta) {
+  state.record.stake = Math.max(0, state.record.stake + delta);
+  saveRecord();
+  if (compactRecord) renderCompactRecord();
+  else renderRecord();
+}
+
 if (!compactRecord) {
 ui.recordControls.querySelectorAll("[data-record]").forEach((button) => {
   button.addEventListener("click", () => changeRecord(button));
 });
 
 ui.stakeControls.querySelectorAll("[data-stake-delta]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const delta = Number(button.dataset.stakeDelta);
-    state.record.stake = Math.max(0, state.record.stake + delta);
-    renderRecord();
-    saveRecord();
-  });
+  button.addEventListener("click", () => changeStake(Number(button.dataset.stakeDelta)));
 });
 
 ui.recordReset.addEventListener("click", () => {

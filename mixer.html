@@ -7,8 +7,8 @@
     <title>팀 섞기 | Team Mixer</title>
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=1" />
-    <link rel="stylesheet" href="styles.css?v=77" />
-    <script src="app.js?v=19" defer></script>
+    <link rel="stylesheet" href="styles.css?v=78" />
+    <script src="app.js?v=20" defer></script>
     <script type="module" src="mixer.js?v=13"></script>
   </head>
   <body class="mixer-page">
@@ -18,8 +18,6 @@
           <div class="mixer-record__summary" aria-live="polite">
             <h2 id="mixerRecordTitle">전적 기록</h2>
             <strong id="mixerScore">0승 0패</strong>
-            <span id="mixerStake"></span>
-            <strong id="mixerSettlement"></strong>
           </div>
           <div class="mixer-record__controls">
             <div role="group" aria-label="승리 횟수">
@@ -30,16 +28,31 @@
               <button class="mixer-button mixer-button--secondary" type="button" data-record="loss" data-delta="-1" aria-label="패배 1회 줄이기">−1</button>
               <button class="mixer-button mixer-button--loss" type="button" data-record="loss" data-delta="1">패배 +1</button>
             </div>
-            <button id="mixerRecordSave" class="mixer-button mixer-button--primary" type="button">전적 저장</button>
+            <div class="mixer-record__settlement">
+              <span>최종 결산</span>
+              <strong id="mixerSettlement" aria-live="polite">0개</strong>
+            </div>
+          </div>
+          <div class="mixer-record__controls mixer-record__stake" role="group" aria-label="판당 별풍선 조절">
+            <span id="mixerStake" aria-live="polite"></span>
+            <div>
+              <button class="mixer-button mixer-button--secondary" type="button" data-stake-delta="-1000" aria-label="판당 별풍선 1000개 줄이기">−1천</button>
+              <button class="mixer-button mixer-button--secondary" type="button" data-stake-delta="-100" aria-label="판당 별풍선 100개 줄이기">−100</button>
+              <button class="mixer-button mixer-button--secondary" type="button" data-stake-delta="100" aria-label="판당 별풍선 100개 늘리기">+100</button>
+              <button class="mixer-button mixer-button--secondary" type="button" data-stake-delta="1000" aria-label="판당 별풍선 1000개 늘리기">+1천</button>
+            </div>
           </div>
           <p id="mixerRecordHint" class="mixer-record__hint" role="status"></p>
+          <div id="mixerUsedChampions" class="history-champions" aria-label="기록된 사용 챔피언" hidden></div>
         </div>
         <div class="mixer-record__champions">
-          <label for="mixerChampionSearch">사용 챔피언</label>
-          <input id="mixerChampionSearch" type="search" placeholder="챔피언 이름 검색" autocomplete="off" />
-          <div id="mixerChampionResults" class="mixer-record__results" hidden></div>
-          <button id="mixerChampionRetry" class="mixer-button mixer-button--secondary" type="button" hidden>챔피언 목록 다시 불러오기</button>
-          <div id="mixerUsedChampions" class="history-champions" hidden></div>
+          <div class="mixer-record__search">
+            <label for="mixerChampionSearch">사용 챔피언</label>
+            <input id="mixerChampionSearch" type="search" placeholder="챔피언 이름 검색" autocomplete="off" />
+            <div id="mixerChampionResults" class="mixer-record__results" hidden></div>
+            <button id="mixerChampionRetry" class="mixer-button mixer-button--secondary" type="button" hidden>챔피언 목록 다시 불러오기</button>
+          </div>
+          <button id="mixerRecordSave" class="mixer-button mixer-button--primary" type="button">전적 저장</button>
         </div>
       </section>
       <div class="mixer-layout">
