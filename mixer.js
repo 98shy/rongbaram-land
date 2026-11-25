@@ -308,10 +308,21 @@ ui.shuffle.addEventListener("click", () => {
   setStatus("팀 섞기를 완료했습니다.");
 });
 
+function formatChatLineup(result) {
+  const rows = result.map(([left, right]) => `${left} vs ${right}`);
+  const paddedRows = rows.map((row, index) => {
+    if (index === rows.length - 1) return row;
+    // Estimate chat width in character columns, with Korean glyphs taking two.
+    const width = [...row].reduce((total, character) =>
+      total + (/[\p{Script=Hangul}\p{Script=Han}]/u.test(character) ? 2 : 1), 0);
+    return row + " ".repeat(Math.max(6, 28 - width));
+  });
+  return " ".repeat(12) + paddedRows.join("");
+}
+
 async function copyResult() {
   if (!state.result.length) return;
-  const rows = state.result.map(([left, right]) => `${left} vs ${right}`);
-  const text = `\n${rows.join("\n")}`;
+  const text = formatChatLineup(state.result);
   try {
     await navigator.clipboard.writeText(text);
   } catch {
