@@ -310,14 +310,7 @@ ui.shuffle.addEventListener("click", () => {
 
 function formatChatLineup(result) {
   const rows = result.map(([left, right]) => `${left} vs ${right}`);
-  const paddedRows = rows.map((row, index) => {
-    if (index === rows.length - 1) return row;
-    // Estimate chat width in character columns, with Korean glyphs taking two.
-    const width = [...row].reduce((total, character) =>
-      total + (/[\p{Script=Hangul}\p{Script=Han}]/u.test(character) ? 2 : 1), 0);
-    return row + " ".repeat(Math.max(6, 28 - width));
-  });
-  return " ".repeat(12) + paddedRows.join("");
+  return " ".repeat(12) + rows.join("\n");
 }
 
 async function copyResult() {
