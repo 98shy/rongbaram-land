@@ -303,10 +303,9 @@ ui.shuffle.addEventListener("click", () => {
 });
 
 async function copyResult() {
-  const text = state.result.map(([left, right]) => `${left} vs ${right}`).join(
-    "\n",
-  );
-  if (!text) return;
+  if (!state.result.length) return;
+  const rows = state.result.map(([left, right]) => `${left} vs ${right}`);
+  const text = `\n${rows.join("\n")}`;
   try {
     await navigator.clipboard.writeText(text);
   } catch {
