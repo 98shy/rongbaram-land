@@ -269,13 +269,20 @@ function validatePairs() {
   return "";
 }
 
-function randomSwap() {
-  if (globalThis.crypto?.getRandomValues) {
-    const value = new Uint32Array(1);
-    crypto.getRandomValues(value);
-    return Boolean(value[0] & 1);
-  }
-  return Math.random() >= 0.5;
+function shufflePairs(pairs, previousResult) {
+  const names = pairs.map(([first, second]) => [first.trim(), second.trim()]);
+  const combinationCount = 1 << names.length;
+  const previousMask = previousResult.length === names.length
+    ? names.reduce((mask, [, second], index) =>
+      previousResult[index][0] === second ? mask | (1 << index) : mask, 0)
+    : -1;
+  const reversedMask = previousMask ^ (combinationCount - 1);
+  const masks = Array.from({ length: combinationCount }, (_, mask) => mask)
+    .filter((mask) => mask !== previousMask && mask !== reversedMask);
+  const chosenMask = masks[Math.floor(Math.random() * masks.length)];
+  return names.map(([first, second], index) =>
+    chosenMask & (1 << index) ? [second, first] : [first, second]
+  );
 }
 
 ui.pairs.addEventListener("input", (event) => {
@@ -294,9 +301,7 @@ ui.pairs.addEventListener("input", (event) => {
 ui.shuffle.addEventListener("click", () => {
   const error = validatePairs();
   if (error) return setStatus(error, true);
-  state.result = state.pairs.map(([first, second]) =>
-    randomSwap() ? [second.trim(), first.trim()] : [first.trim(), second.trim()]
-  );
+  state.result = shufflePairs(state.pairs, state.result);
   state.armed = false;
   saveMixerState();
   renderResult();
@@ -338,9 +343,10 @@ ui.reset.addEventListener("click", () => {
     armed: false,
   };
   saveMixerState();
+  window.dispatchEvent(new Event("mixer-reset"));
   createPairInputs();
   renderResult();
-  setStatus("입력과 배치 결과를 초기화했습니다.");
+  setStatus("입력과 팀 구성, 현재 전적을 초기화했습니다.");
 });
 
 window.addEventListener("storage", (event) => {

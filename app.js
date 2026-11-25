@@ -847,6 +847,7 @@ function initCompactRecord() {
   }
   stakeTrigger.addEventListener("click", () => stakeDialog.showModal());
   save.addEventListener("click", saveCurrentLandRecord);
+  window.addEventListener("mixer-reset", clearCurrentSession);
   window.addEventListener("mixer-lineup-change", renderCompactRecord);
   renderCompactRecord();
 }
