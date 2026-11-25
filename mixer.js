@@ -71,6 +71,7 @@ function readMixerState() {
 function saveMixerState() {
   try {
     localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(state));
+    window.dispatchEvent(new Event("mixer-lineup-change"));
   } catch {
     setStatus("브라우저 저장 공간을 확인해 주세요.", true);
   }
@@ -349,6 +350,11 @@ window.addEventListener("storage", (event) => {
     event.key === TEAM_EVENTS_STORAGE_KEY ||
     event.key === MIXER_STORAGE_KEY
   ) renderResult();
+});
+
+window.addEventListener("game-record-change", () => {
+  state = readMixerState();
+  renderResult();
 });
 
 createPairInputs();

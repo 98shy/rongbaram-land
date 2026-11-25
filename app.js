@@ -19,6 +19,8 @@ const CHAMPION_ALIASES = {
   TahmKench: ["탐켄치"],
 };
 const KOREAN_INITIALS = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
+const compactRecord = document.querySelector("#mixerRecord");
+let renderCompactRecord;
 
 const state = {
   champions: [],
@@ -295,6 +297,7 @@ function saveGameState() {
   saveUsed();
   saveRecord();
   saveMatchState();
+  if (compactRecord) window.dispatchEvent(new Event("game-record-change"));
 }
 
 function renderRecord() {
@@ -466,6 +469,10 @@ function renderMatchHistory() {
 }
 
 function renderGameState() {
+  if (compactRecord) {
+    renderCompactRecord();
+    return;
+  }
   renderRecord();
   render();
   renderMatchHistory();
@@ -478,9 +485,11 @@ async function getJSON(url) {
 }
 
 async function loadChampions() {
-  ui.loading.hidden = false;
-  ui.error.hidden = true;
-  ui.grid.hidden = true;
+  if (!compactRecord) {
+    ui.loading.hidden = false;
+    ui.error.hidden = true;
+    ui.grid.hidden = true;
+  }
 
   try {
     let version = FALLBACK_VERSION;
@@ -497,6 +506,11 @@ async function loadChampions() {
       a.name.localeCompare(b.name, "ko-KR")
     );
 
+    if (compactRecord) {
+      renderGameState();
+      return;
+    }
+    refreshStoredGameState();
     const validIds = new Set(state.champions.map((champion) => champion.id));
     state.used = new Set([...state.used].filter((id) => validIds.has(id)));
     state.matchState.matches = state.matchState.matches.filter((match) => validIds.has(match.championId));
@@ -511,6 +525,10 @@ async function loadChampions() {
     renderGameState();
   } catch (error) {
     console.error(error);
+    if (compactRecord) {
+      compactRecord.querySelector("#mixerChampionRetry").hidden = false;
+      return;
+    }
     ui.loading.hidden = true;
     ui.error.hidden = false;
   }
@@ -686,6 +704,124 @@ function showToast(message) {
   toastTimer = setTimeout(() => ui.toast.classList.remove("is-visible"), 1800);
 }
 
+function refreshStoredGameState() {
+  state.used = new Set(readStoredUsed());
+  state.record = readStoredRecord();
+  state.matchState = readStoredMatchState();
+}
+
+function initCompactRecord() {
+  const search = compactRecord.querySelector("#mixerChampionSearch");
+  const results = compactRecord.querySelector("#mixerChampionResults");
+  const usedList = compactRecord.querySelector("#mixerUsedChampions");
+  const retry = compactRecord.querySelector("#mixerChampionRetry");
+  const save = compactRecord.querySelector("#mixerRecordSave");
+  const scoreButtons = compactRecord.querySelectorAll("[data-record]");
+
+  function renderSearch() {
+    const query = normalizeSearchText(search.value);
+    results.replaceChildren();
+    results.hidden = !query;
+    if (!query) return;
+
+    const matches = state.champions.filter((champion) =>
+      !state.used.has(champion.id) && matchesChampionSearch(champion, query)
+    ).slice(0, 8);
+    if (!matches.length) {
+      results.textContent = state.champions.length
+        ? "추가할 수 있는 챔피언이 없습니다."
+        : "챔피언 목록을 불러오는 중입니다.";
+      return;
+    }
+    for (const champion of matches) {
+      const button = createSmallButton(champion.name, "add-champion", champion.id);
+      button.className = "mixer-button mixer-button--secondary";
+      results.append(button);
+    }
+  }
+
+  renderCompactRecord = () => {
+    const { wins, losses, stake } = state.record;
+    const settlement = (wins - losses) * stake;
+    compactRecord.querySelector("#mixerScore").textContent = `${wins}승 ${losses}패`;
+    compactRecord.querySelector("#mixerStake").textContent = `판당 ${stake.toLocaleString("ko-KR")}개`;
+    compactRecord.querySelector("#mixerSettlement").textContent = `최종 결산 ${settlement > 0 ? "+" : ""}${settlement.toLocaleString("ko-KR")}개`;
+    const mapping = readMixerMapping();
+    const teams = validMixerTeams(mapping?.confirmedResult);
+    const hasHost = teams.flat().some((name) =>
+      ["수힛", "수히"].includes(name.normalize("NFKC").replace(/\s+/g, ""))
+    );
+    compactRecord.querySelector("#mixerRecordHint").textContent = mapping?.armed && hasHost
+      ? "다음 경기 결과가 팀 전적에 반영됩니다."
+      : "팀 전적에 반영하려면 수힛 또는 수히를 포함해 복사하세요.";
+    for (const button of scoreButtons) {
+      const count = button.dataset.record === "win" ? wins : losses;
+      button.disabled = button.dataset.delta === "-1" && count === 0;
+    }
+    save.disabled = wins + losses === 0;
+
+    const portraits = document.createDocumentFragment();
+    const outcomes = new Map(state.matchState.matches.map(({ championId, result }) => [championId, result]));
+    for (const id of state.used) {
+      const name = getChampionName(id);
+      const button = createSmallButton("", "remove-champion", id);
+      button.className = "mixer-record__portrait-button";
+      button.setAttribute("aria-label", `${name} 사용 기록 취소`);
+      button.title = `${name} 사용 기록 취소`;
+      const portrait = document.createElement("img");
+      const champion = state.champions.find((item) => item.id === id);
+      const result = outcomes.get(id);
+      portrait.className = result ? `history-champion history-champion--${result}` : "history-champion";
+      portrait.src = `${DDRAGON_ROOT}/cdn/${state.version || FALLBACK_VERSION}/img/champion/${champion?.image.full ?? `${id}.png`}`;
+      portrait.alt = name;
+      portrait.width = 36;
+      portrait.height = 36;
+      button.append(portrait);
+      portraits.append(button);
+    }
+    usedList.replaceChildren(portraits);
+    usedList.hidden = !state.used.size;
+    renderSearch();
+  };
+
+  function addChampion(button) {
+    if (!button || state.used.has(button.dataset.value)) return;
+    search.value = "";
+    toggleChampion(button.dataset.value);
+    search.focus();
+  }
+
+  search.addEventListener("input", renderSearch);
+  search.addEventListener("keydown", (event) => {
+    if (event.isComposing) return;
+    if (event.key === "Enter" && results.querySelector("button")) {
+      event.preventDefault();
+      addChampion(results.querySelector("button"));
+    } else if (event.key === "Escape") {
+      search.value = "";
+      renderSearch();
+    }
+  });
+  results.addEventListener("click", (event) => addChampion(event.target.closest("button")));
+  usedList.addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    toggleChampion(button.dataset.value);
+    search.focus();
+  });
+  retry.addEventListener("click", () => {
+    retry.hidden = true;
+    loadChampions();
+  });
+  for (const button of scoreButtons) {
+    button.addEventListener("click", () => changeRecord(button));
+  }
+  save.addEventListener("click", saveCurrentLandRecord);
+  window.addEventListener("mixer-lineup-change", renderCompactRecord);
+  renderCompactRecord();
+}
+
+if (!compactRecord) {
 ui.grid.addEventListener("click", (event) => {
   const champion = event.target.closest(".champion");
   if (champion) toggleChampion(champion.dataset.championId);
@@ -760,53 +896,57 @@ ui.reset.addEventListener("click", () => {
 });
 
 ui.retry.addEventListener("click", loadChampions);
+}
 
-ui.recordControls.querySelectorAll("[data-record]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const result = button.dataset.record;
-    const key = result === "win" ? "wins" : "losses";
-    const delta = Number(button.dataset.delta);
-    state.history = [];
-    if (delta > 0) {
-      state.record[key] += 1;
-      consumeMixerAssignment(result);
-      state.matchState.pendingResults.push(result);
-      const created = attemptMatches();
-      saveGameState();
-      renderGameState();
-      if (created.length) {
-        const match = created.at(-1);
-        showToast(`${getChampionName(match.championId)} · ${resultLabel(match.result)} 기록 완료`);
-      } else {
-        showToast(`${resultLabel(result)} · 챔피언 선택 대기`);
-      }
-      return;
-    }
-
-    if (state.record[key] === 0) return;
-    revokeMixerAssignment(result, state.record[key]);
-    let message = `${resultLabel(result)} 1회를 취소했습니다.`;
-    if (state.matchState.replacement?.result === result) {
-      state.matchState.replacement = null;
-    } else {
-      const pendingIndex = state.matchState.pendingResults.lastIndexOf(result);
-      if (pendingIndex >= 0) {
-        state.matchState.pendingResults.splice(pendingIndex, 1);
-      } else {
-        const matchIndex = state.matchState.matches.findLastIndex((match) => match.result === result);
-        if (matchIndex >= 0) {
-          const [removedMatch] = state.matchState.matches.splice(matchIndex, 1);
-          state.used.delete(removedMatch.championId);
-          if (state.replacingMatchId === removedMatch.id) state.replacingMatchId = null;
-          message = `${getChampionName(removedMatch.championId)}의 ${resultLabel(result)} 기록을 취소했습니다.`;
-        }
-      }
-    }
-    state.record[key] -= 1;
+function changeRecord(button) {
+  const result = button.dataset.record;
+  const key = result === "win" ? "wins" : "losses";
+  const delta = Number(button.dataset.delta);
+  state.history = [];
+  if (delta > 0) {
+    state.record[key] += 1;
+    consumeMixerAssignment(result);
+    state.matchState.pendingResults.push(result);
+    const created = attemptMatches();
     saveGameState();
     renderGameState();
-    showToast(message);
-  });
+    if (created.length) {
+      const match = created.at(-1);
+      showToast(`${getChampionName(match.championId)} · ${resultLabel(match.result)} 기록 완료`);
+    } else {
+      showToast(`${resultLabel(result)} · 챔피언 선택 대기`);
+    }
+    return;
+  }
+
+  if (state.record[key] === 0) return;
+  revokeMixerAssignment(result, state.record[key]);
+  let message = `${resultLabel(result)} 1회를 취소했습니다.`;
+  if (state.matchState.replacement?.result === result) {
+    state.matchState.replacement = null;
+  } else {
+    const pendingIndex = state.matchState.pendingResults.lastIndexOf(result);
+    if (pendingIndex >= 0) {
+      state.matchState.pendingResults.splice(pendingIndex, 1);
+    } else {
+      const matchIndex = state.matchState.matches.findLastIndex((match) => match.result === result);
+      if (matchIndex >= 0) {
+        const [removedMatch] = state.matchState.matches.splice(matchIndex, 1);
+        state.used.delete(removedMatch.championId);
+        if (state.replacingMatchId === removedMatch.id) state.replacingMatchId = null;
+        message = `${getChampionName(removedMatch.championId)}의 ${resultLabel(result)} 기록을 취소했습니다.`;
+      }
+    }
+  }
+  state.record[key] -= 1;
+  saveGameState();
+  renderGameState();
+  showToast(message);
+}
+
+if (!compactRecord) {
+ui.recordControls.querySelectorAll("[data-record]").forEach((button) => {
+  button.addEventListener("click", () => changeRecord(button));
 });
 
 ui.stakeControls.querySelectorAll("[data-stake-delta]").forEach((button) => {
@@ -965,4 +1105,19 @@ document.addEventListener("keydown", (event) => {
 
 renderRecord();
 renderMatchHistory();
+} else {
+  initCompactRecord();
+}
+
+window.addEventListener("storage", (event) => {
+  if ([null, STORAGE_KEY, RECORD_STORAGE_KEY, MATCH_STORAGE_KEY].includes(event.key)) {
+    refreshStoredGameState();
+    state.history = [];
+    state.replacingMatchId = null;
+    renderGameState();
+  } else if (compactRecord && event.key === MIXER_STORAGE_KEY) {
+    renderCompactRecord();
+  }
+});
+
 loadChampions();
