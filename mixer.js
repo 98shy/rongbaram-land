@@ -310,7 +310,7 @@ ui.shuffle.addEventListener("click", () => {
 
 function formatChatLineup(result) {
   const rows = result.map(([left, right]) => `${left} vs ${right}`);
-  return " ".repeat(12) + rows.join("\n");
+  return " ".repeat(24) + rows.join("\n");
 }
 
 async function copyResult() {
