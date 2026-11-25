@@ -223,7 +223,11 @@ function renderHistory() {
     const champions = document.createElement("div");
     champions.className = "history-champions";
 
+    let matchedWins = 0;
+    let matchedLosses = 0;
     normalizedChampions(record).forEach((savedChampion) => {
+      if (savedChampion.result === "win") matchedWins += 1;
+      if (savedChampion.result === "loss") matchedLosses += 1;
       const champion = championData.get(savedChampion.id);
       const image = document.createElement("img");
       image.src = `${DDRAGON_ROOT}/cdn/${ddragonVersion}/img/champion/${champion?.image.full ?? `${savedChampion.id}.png`}`;
@@ -238,6 +242,17 @@ function renderHistory() {
       image.className = `history-champion${resultClass}`;
       champions.append(image);
     });
+
+    for (const [result, count] of [["win", wins - matchedWins], ["loss", losses - matchedLosses]]) {
+      for (let index = 0; index < count; index += 1) {
+        const slot = document.createElement("span");
+        slot.className = `history-champion history-champion--${result} history-champion--unassigned`;
+        slot.title = `${result === "win" ? "승리" : "패배"} · 챔피언 미선택`;
+        slot.setAttribute("role", "img");
+        slot.setAttribute("aria-label", slot.title);
+        champions.append(slot);
+      }
+    }
 
     if (!champions.childElementCount) {
       const emptyChampions = document.createElement("span");

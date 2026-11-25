@@ -774,6 +774,8 @@ function initCompactRecord() {
 
     const portraits = document.createDocumentFragment();
     const outcomes = new Map(state.matchState.matches.map(({ championId, result }) => [championId, result]));
+    let matchedWins = 0;
+    let matchedLosses = 0;
     for (const id of state.used) {
       const name = getChampionName(id);
       const button = createSmallButton("", "remove-champion", id);
@@ -783,6 +785,8 @@ function initCompactRecord() {
       const portrait = document.createElement("img");
       const champion = state.champions.find((item) => item.id === id);
       const result = outcomes.get(id);
+      if (result === "win") matchedWins += 1;
+      if (result === "loss") matchedLosses += 1;
       portrait.className = result ? `history-champion history-champion--${result}` : "history-champion";
       portrait.src = `${DDRAGON_ROOT}/cdn/${state.version || FALLBACK_VERSION}/img/champion/${champion?.image.full ?? `${id}.png`}`;
       portrait.alt = name;
@@ -791,8 +795,18 @@ function initCompactRecord() {
       button.append(portrait);
       portraits.append(button);
     }
+    for (const [result, count] of [["win", wins - matchedWins], ["loss", losses - matchedLosses]]) {
+      for (let index = 0; index < count; index += 1) {
+        const slot = document.createElement("span");
+        slot.className = `history-champion history-champion--${result} history-champion--unassigned`;
+        slot.title = `${resultLabel(result)} · 챔피언 미선택`;
+        slot.setAttribute("role", "img");
+        slot.setAttribute("aria-label", slot.title);
+        portraits.append(slot);
+      }
+    }
+    usedList.hidden = !portraits.childElementCount;
     usedList.replaceChildren(portraits);
-    usedList.hidden = !state.used.size;
     renderSearch();
   };
 
@@ -963,6 +977,11 @@ function changeRecord(button) {
 function changeStake(delta) {
   state.record.stake = Math.max(0, state.record.stake + delta);
   saveRecord();
+  const pendingTeamEvents = readPendingTeamEvents();
+  if (pendingTeamEvents.length) {
+    savePendingTeamEvents(pendingTeamEvents.map((event) => ({ ...event, stake: state.record.stake })));
+    if (compactRecord) window.dispatchEvent(new Event("game-record-change"));
+  }
   if (compactRecord) renderCompactRecord();
   else renderRecord();
 }
