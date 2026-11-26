@@ -118,7 +118,8 @@ function readStoredMatchState() {
         ? saved.matches.filter((match) => match && match.id && match.championId && validResult(match.result))
         : [],
       pendingResults: Array.isArray(saved.pendingResults)
-        ? saved.pendingResults.filter(validResult)
+        ? saved.pendingResults.map((entry) => typeof entry === "string" ? { result: entry } : entry)
+          .filter((entry) => validResult(entry?.result))
         : [],
       pendingChampions: Array.isArray(saved.pendingChampions)
         ? saved.pendingChampions.filter((id) => typeof id === "string")
@@ -185,13 +186,23 @@ function savePendingTeamEvents(events) {
   localStorage.setItem(TEAM_EVENTS_STORAGE_KEY, JSON.stringify(events));
 }
 
-function consumeMixerAssignment(result) {
+function getCompletedTeamEvents(matchState = readStoredMatchState()) {
+  const completedIds = new Set(matchState.matches.map(({ id }) => id));
+  const completedCounts = { win: 0, loss: 0 };
+  for (const { result } of matchState.matches) completedCounts[result] += 1;
+  return readPendingTeamEvents().filter((event) => event?.linkedById
+    ? completedIds.has(event.id)
+    : event?.recordCount > 0 && event.recordCount <= completedCounts[event.result]);
+}
+
+function consumeMixerAssignment({ id, result }) {
   const mapping = readMixerMapping();
   const teams = validMixerTeams(mapping?.confirmedResult);
   if (!mapping?.armed || !teams.length) return;
   const events = readPendingTeamEvents();
   events.push({
-    id: createMatchId(),
+    id,
+    linkedById: true,
     result,
     recordCount: result === "win" ? state.record.wins : state.record.losses,
     stake: state.record.stake,
@@ -203,40 +214,46 @@ function consumeMixerAssignment(result) {
   localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
 }
 
-function revokeMixerAssignment(result, recordCount) {
+function revokeMixerAssignment(entry, recordCount) {
+  if (!entry) return;
   const events = readPendingTeamEvents();
   const index = events.findLastIndex((event) =>
-    event?.result === result && Number(event?.recordCount) === recordCount
+    event?.linkedById ? event.id === entry.id
+      : event?.result === entry.result && Number(event?.recordCount) === recordCount
   );
   if (index < 0) return;
   const [removed] = events.splice(index, 1);
   savePendingTeamEvents(events);
   const mapping = readMixerMapping();
-  if (!mapping) return;
+  if (!mapping || mapping.armed) return;
   mapping.confirmedResult = validMixerTeams(removed.teamResult);
   mapping.armed = true;
   localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
 }
 
-function clearMixerSessionTracking() {
+function clearMixerSessionTracking(clearLineup) {
   try {
     savePendingTeamEvents([]);
     const mapping = readMixerMapping();
     if (!mapping) return;
     mapping.armed = false;
+    if (clearLineup) {
+      mapping.result = [];
+      mapping.confirmedResult = [];
+    }
     localStorage.setItem(MIXER_STORAGE_KEY, JSON.stringify(mapping));
   } catch {
     // 팀 섞기 기록을 사용할 수 없어도 기본 전적 초기화는 계속 진행합니다.
   }
 }
 
-function clearCurrentSession() {
+function clearCurrentSession({ clearLineup = false } = {}) {
   state.history = [];
   state.used.clear();
   state.record = { ...state.record, wins: 0, losses: 0 };
   state.matchState = { matches: [], pendingResults: [], pendingChampions: [], replacement: null };
   state.replacingMatchId = null;
-  clearMixerSessionTracking();
+  clearMixerSessionTracking(clearLineup);
   saveGameState();
   renderGameState();
 }
@@ -262,13 +279,13 @@ function saveCurrentLandRecord() {
     stake: state.record.stake,
     settlement: (state.record.wins - state.record.losses) * state.record.stake,
     champions: [...mappedChampions, ...remainingChampions],
-    teamMatches: readPendingTeamEvents(),
+    teamMatches: getCompletedTeamEvents(state.matchState),
   };
   records.push(landRecord);
 
   try {
     localStorage.setItem(LAND_RECORDS_STORAGE_KEY, JSON.stringify(records));
-    clearCurrentSession();
+    clearCurrentSession({ clearLineup: true });
     showToast("랜드 전적에 저장하고 현재 기록을 초기화했습니다.");
   } catch {
     showToast("브라우저 저장 공간을 확인해 주세요.");
@@ -327,9 +344,9 @@ function resultLabel(result) {
 function attemptMatches() {
   const created = [];
   while (state.matchState.pendingResults.length && state.matchState.pendingChampions.length) {
-    const result = state.matchState.pendingResults.shift();
+    const { id, result } = state.matchState.pendingResults.shift();
     const championId = state.matchState.pendingChampions.shift();
-    const match = { id: createMatchId(), championId, result, stake: state.record.stake, createdAt: Date.now() };
+    const match = { id: id ?? createMatchId(), championId, result, stake: state.record.stake, createdAt: Date.now() };
     state.matchState.matches.push(match);
     created.push(match);
   }
@@ -378,7 +395,7 @@ function renderMatchHistory() {
     ui.mappingStatusText.textContent = `${resultLabel(replacement.result)} 기록에 다시 연결할 챔피언을 선택하세요.`;
     ui.cancelChampionChange.hidden = false;
   } else if (pendingCount) {
-    const wins = pendingResults.filter((result) => result === "win").length;
+    const wins = pendingResults.filter(({ result }) => result === "win").length;
     const losses = pendingResults.length - wins;
     const parts = [];
     if (wins) parts.push(`승리 ${wins}`);
@@ -401,7 +418,7 @@ function renderMatchHistory() {
     row.append(text, createSmallButton("취소", "cancel-replacement"));
     pendingFragment.append(row);
   }
-  pendingResults.forEach((result, index) => {
+  pendingResults.forEach(({ result }, index) => {
     const row = document.createElement("div");
     row.className = "pending-match";
     const text = document.createElement("span");
@@ -669,7 +686,7 @@ function toggleChampion(id) {
     } else if (matchIndex >= 0) {
       const [match] = state.matchState.matches.splice(matchIndex, 1);
       if (state.matchState.replacement) {
-        state.matchState.pendingResults.unshift(state.matchState.replacement.result);
+        state.matchState.pendingResults.unshift(state.matchState.replacement);
       }
       state.matchState.replacement = {
         id: match.id,
@@ -760,9 +777,14 @@ function initCompactRecord() {
     const hasHost = teams.flat().some((name) =>
       ["수힛", "수히"].includes(name.normalize("NFKC").replace(/\s+/g, ""))
     );
-    compactRecord.querySelector("#mixerRecordHint").textContent = mapping?.armed && hasHost
-      ? "다음 경기 결과가 팀 전적에 반영됩니다."
-      : "팀 전적에 반영하려면 경기마다 복사한 뒤 승패를 입력하세요.";
+    const waitingForChampion = readPendingTeamEvents().some(({ id }) =>
+      state.matchState.pendingResults.some((entry) => entry.id === id) || state.matchState.replacement?.id === id
+    );
+    compactRecord.querySelector("#mixerRecordHint").textContent = waitingForChampion
+      ? "사용 챔피언을 선택하면 팀 전적에 반영됩니다."
+      : mapping?.armed && hasHost
+      ? "승패와 사용 챔피언을 입력하면 팀 전적에 반영됩니다."
+      : "팀 전적에 반영하려면 경기마다 복사한 뒤 승패와 사용 챔피언을 입력하세요.";
     for (const button of scoreButtons) {
       const count = button.dataset.record === "win" ? wins : losses;
       button.disabled = button.dataset.delta === "-1" && count === 0;
@@ -913,8 +935,8 @@ ui.undo.addEventListener("click", () => {
 ui.reset.addEventListener("click", () => {
   if (!state.used.size) return showToast("초기화할 기록이 없습니다.");
   takeSnapshot();
-  const returnedResults = state.matchState.matches.map((match) => match.result);
-  if (state.matchState.replacement) returnedResults.push(state.matchState.replacement.result);
+  const returnedResults = state.matchState.matches.map(({ id, result }) => ({ id, result }));
+  if (state.matchState.replacement) returnedResults.push(state.matchState.replacement);
   state.matchState.pendingResults = [...returnedResults, ...state.matchState.pendingResults];
   state.matchState.matches = [];
   state.matchState.pendingChampions = [];
@@ -936,8 +958,9 @@ function changeRecord(button) {
   state.history = [];
   if (delta > 0) {
     state.record[key] += 1;
-    consumeMixerAssignment(result);
-    state.matchState.pendingResults.push(result);
+    const entry = { id: createMatchId(), result };
+    consumeMixerAssignment(entry);
+    state.matchState.pendingResults.push(entry);
     const created = attemptMatches();
     saveGameState();
     renderGameState();
@@ -951,24 +974,27 @@ function changeRecord(button) {
   }
 
   if (state.record[key] === 0) return;
-  revokeMixerAssignment(result, state.record[key]);
+  let removedResult;
   let message = `${resultLabel(result)} 1회를 취소했습니다.`;
   if (state.matchState.replacement?.result === result) {
+    removedResult = state.matchState.replacement;
     state.matchState.replacement = null;
   } else {
-    const pendingIndex = state.matchState.pendingResults.lastIndexOf(result);
+    const pendingIndex = state.matchState.pendingResults.findLastIndex((entry) => entry.result === result);
     if (pendingIndex >= 0) {
-      state.matchState.pendingResults.splice(pendingIndex, 1);
+      [removedResult] = state.matchState.pendingResults.splice(pendingIndex, 1);
     } else {
       const matchIndex = state.matchState.matches.findLastIndex((match) => match.result === result);
       if (matchIndex >= 0) {
         const [removedMatch] = state.matchState.matches.splice(matchIndex, 1);
+        removedResult = removedMatch;
         state.used.delete(removedMatch.championId);
         if (state.replacingMatchId === removedMatch.id) state.replacingMatchId = null;
         message = `${getChampionName(removedMatch.championId)}의 ${resultLabel(result)} 기록을 취소했습니다.`;
       }
     }
   }
+  revokeMixerAssignment(removedResult, state.record[key]);
   state.record[key] -= 1;
   saveGameState();
   renderGameState();
@@ -1014,7 +1040,7 @@ function cancelChampionReplacement() {
   }
   if (!state.matchState.replacement) return;
   state.history = [];
-  state.matchState.pendingResults.unshift(state.matchState.replacement.result);
+  state.matchState.pendingResults.unshift(state.matchState.replacement);
   state.matchState.replacement = null;
   const created = attemptMatches();
   saveGameState();
@@ -1068,9 +1094,10 @@ ui.pendingMatchList.addEventListener("click", (event) => {
   state.history = [];
   const index = Number(button.dataset.value);
   if (action === "remove-pending-result") {
-    const [result] = state.matchState.pendingResults.splice(index, 1);
-    if (!result) return;
-    const key = result === "win" ? "wins" : "losses";
+    const [entry] = state.matchState.pendingResults.splice(index, 1);
+    if (!entry) return;
+    const key = entry.result === "win" ? "wins" : "losses";
+    revokeMixerAssignment(entry, state.record[key]);
     state.record[key] = Math.max(0, state.record[key] - 1);
   } else if (action === "remove-pending-champion") {
     const [championId] = state.matchState.pendingChampions.splice(index, 1);
@@ -1103,6 +1130,7 @@ ui.completedMatchList.addEventListener("click", (event) => {
     state.history = [];
     state.matchState.matches.splice(matchIndex, 1);
     const key = match.result === "win" ? "wins" : "losses";
+    revokeMixerAssignment(match, state.record[key]);
     state.record[key] = Math.max(0, state.record[key] - 1);
     state.used.delete(match.championId);
     if (state.replacingMatchId === match.id) state.replacingMatchId = null;

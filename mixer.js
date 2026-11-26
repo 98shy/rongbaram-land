@@ -1,6 +1,7 @@
 const MIXER_STORAGE_KEY = "rongbaram-land:team-mixer-v1";
 const LAND_RECORDS_STORAGE_KEY = "lol-champion-tracker:land-records-v1";
 const TEAM_EVENTS_STORAGE_KEY = "rongbaram-land:pending-team-events-v1";
+const MATCH_STORAGE_KEY = "lol-champion-tracker:matches-v1";
 const PAIR_COUNT = 5;
 const SUHIT_ALIASES = new Set(["수힛", "수히"]);
 
@@ -86,15 +87,6 @@ function readLandRecords() {
   }
 }
 
-function readPendingTeamEvents() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(TEAM_EVENTS_STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
-}
-
 function addParticipantRecord(stats, target, record, teamResult) {
   const teams = normalizedResult(teamResult);
   if (!teams.length) return stats;
@@ -147,7 +139,7 @@ function participantStats(name) {
     },
     { wins: 0, losses: 0, settlement: 0 },
   );
-  readPendingTeamEvents().forEach((match) => {
+  window.getCompletedTeamEvents().forEach((match) => {
     addParticipantRecord(
       stats,
       target,
@@ -358,7 +350,8 @@ window.addEventListener("storage", (event) => {
   if (
     event.key === LAND_RECORDS_STORAGE_KEY ||
     event.key === TEAM_EVENTS_STORAGE_KEY ||
-    event.key === MIXER_STORAGE_KEY
+    event.key === MIXER_STORAGE_KEY ||
+    event.key === MATCH_STORAGE_KEY
   ) renderResult();
 });
 
