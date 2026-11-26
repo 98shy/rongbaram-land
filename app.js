@@ -173,6 +173,30 @@ function validMixerTeams(value) {
   return teams.every((pair) => pair[0] && pair[1]) ? teams : [];
 }
 
+function isMixerHost(name) {
+  return ["수힛", "수히"].includes(name.normalize("NFKC").replace(/\s+/g, ""));
+}
+
+function findMixerOpponent(pairs) {
+  if (!Array.isArray(pairs)) return "";
+  const names = pairs.map((pair) => [String(pair?.[0] ?? "").trim(), String(pair?.[1] ?? "").trim()]);
+  if (names.flat().filter(isMixerHost).length !== 1) return "";
+  const pair = names.find((namesInPair) => namesInPair.some(isMixerHost));
+  return pair.find((name) => !isMixerHost(name)) ?? "";
+}
+
+function getMixerSaveBalance() {
+  const opponents = new Map();
+  for (const event of readPendingTeamEvents()) {
+    const name = findMixerOpponent(event?.teamResult);
+    if (name) opponents.set(name.normalize("NFKC").replace(/\s+/g, "").toLocaleLowerCase("ko-KR"), name);
+  }
+  if (opponents.size > 1) return "";
+  if (opponents.size === 1) return opponents.values().next().value;
+  const mapping = readMixerMapping();
+  return findMixerOpponent(mapping?.result) || findMixerOpponent(mapping?.pairs);
+}
+
 function readPendingTeamEvents() {
   try {
     const saved = JSON.parse(localStorage.getItem(TEAM_EVENTS_STORAGE_KEY));
@@ -271,6 +295,7 @@ function saveCurrentLandRecord() {
     .filter((id) => !includedIds.has(id))
     .map((id) => ({ id, result: null }));
   const records = readLandRecords();
+  const balance = compactRecord ? getMixerSaveBalance() : "";
   const landRecord = {
     id: createMatchId(),
     createdAt: Date.now(),
@@ -280,6 +305,7 @@ function saveCurrentLandRecord() {
     settlement: (state.record.wins - state.record.losses) * state.record.stake,
     champions: [...mappedChampions, ...remainingChampions],
     teamMatches: getCompletedTeamEvents(state.matchState),
+    ...(balance ? { balance } : {}),
   };
   records.push(landRecord);
 
@@ -774,9 +800,7 @@ function initCompactRecord() {
     settlementLabel.classList.toggle("is-negative", settlement < 0);
     const mapping = readMixerMapping();
     const teams = validMixerTeams(mapping?.confirmedResult);
-    const hasHost = teams.flat().some((name) =>
-      ["수힛", "수히"].includes(name.normalize("NFKC").replace(/\s+/g, ""))
-    );
+    const hasHost = teams.flat().some(isMixerHost);
     const waitingForChampion = readPendingTeamEvents().some(({ id }) =>
       state.matchState.pendingResults.some((entry) => entry.id === id) || state.matchState.replacement?.id === id
     );
