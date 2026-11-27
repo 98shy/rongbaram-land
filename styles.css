@@ -67,7 +67,7 @@ button { color: inherit; }
   pointer-events: none;
 }
 .category-card--land::before {
-  inset: 0 auto 0 min(-96%, -525px);
+  inset: 0 auto 0 min(-96.5%, -528px);
   z-index: -2;
   width: max(210%, 1150px);
   background:
@@ -75,11 +75,12 @@ button { color: inherit; }
     url("assets/hero-aram-land-v3.jpg") left bottom / 100% auto no-repeat;
 }
 .category-card--land::after {
-  inset: 0 auto 48px 0;
+  inset: 0;
   z-index: -1;
-  width: 78px;
-  background: #102338;
-  mask-image: linear-gradient(to right, #000 55px, transparent), linear-gradient(#000 calc(100% - 17px), transparent);
+  background:
+    linear-gradient(180deg, #10233855, #102338ad 90%),
+    url("assets/hero-aram-land-v3.jpg") right bottom / max(210%, 1150px) auto no-repeat;
+  mask-image: linear-gradient(to right, #000 55px, transparent 82px), linear-gradient(#000 calc(100% - 65px), transparent calc(100% - 48px));
   mask-composite: intersect;
 }
 .category-card--tools { background: linear-gradient(180deg, #132a2366, #132a23 85%), url("assets/memo-forest-background-v2.jpg") center / cover; }
