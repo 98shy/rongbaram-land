@@ -6,17 +6,14 @@
     <title>빙고판</title>
     <meta name="bingo-api" content="" />
     <link rel="icon" href="assets/favicon.png?v=1" />
-    <link rel="stylesheet" href="styles.css?v=84" />
-    <link rel="stylesheet" href="bingo.css?v=1" />
-    <script type="module" src="bingo.js?v=1"></script>
+    <link rel="stylesheet" href="styles.css?v=85" />
+    <link rel="stylesheet" href="bingo.css?v=2" />
+    <script type="module" src="bingo.js?v=2"></script>
   </head>
   <body class="bingo-page">
     <main class="bingo-shell">
       <header class="bingo-header">
-        <div>
-          <a class="bingo-home" href="index.html">← TOOL</a>
-          <h1>배틀그라운드 빙고판</h1>
-        </div>
+        <a class="bingo-home" href="index.html">← TOOL</a>
         <div class="bingo-actions">
           <button id="shareBoard" class="bingo-button" type="button" hidden>공유 링크 복사</button>
           <button id="newBoard" class="bingo-button" type="button">새 빙고판</button>
@@ -24,9 +21,8 @@
       </header>
       <p id="bingoStatus" class="bingo-status" role="status"></p>
       <div id="bingoWorkspace" class="bingo-workspace" hidden>
-        <section class="bingo-panel" aria-labelledby="boardTitle">
-          <div class="bingo-panel-heading">
-            <h2 id="boardTitle">빙고판</h2>
+        <section class="bingo-panel" aria-label="빙고판">
+          <div class="bingo-panel-heading bingo-board-summary">
             <output id="completedLines" aria-live="polite"></output>
           </div>
           <div id="bingoGrid" class="bingo-grid"></div>
@@ -42,12 +38,13 @@
     <dialog id="boardSetup" class="bingo-dialog" aria-labelledby="setupTitle">
       <form id="setupForm">
         <h2 id="setupTitle">빙고판 크기</h2>
-        <div class="bingo-dimensions">
-          <label>가로 <input id="boardColumns" type="number" min="2" max="8" value="5" required autofocus /></label>
-          <span aria-hidden="true">×</span>
-          <label>세로 <input id="boardRows" type="number" min="2" max="8" value="5" required /></label>
-        </div>
-        <p id="setupStatus" role="status">가로와 세로를 각각 2~8칸으로 설정하세요.</p>
+        <select id="boardSize" class="bingo-size" aria-labelledby="setupTitle" autofocus>
+          <option value="4">4 × 4</option>
+          <option value="5" selected>5 × 5</option>
+          <option value="6">6 × 6</option>
+          <option value="7">7 × 7</option>
+          <option value="8">8 × 8</option>
+        </select>
         <div class="bingo-actions">
           <button id="cancelSetup" class="bingo-button" type="button" hidden>취소</button>
           <button class="bingo-button bingo-button--accent" type="submit">만들기</button>

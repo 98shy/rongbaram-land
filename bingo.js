@@ -1,4 +1,4 @@
-import { completedLines, makeBoard, updateCell, validBoard, validDimensions } from "./bingo-model.js";
+import { completedLines, makeBoard, updateCell, validBoard } from "./bingo-model.js";
 
 const api = document.querySelector('meta[name="bingo-api"]')?.content.replace(/\/$/, "") ?? "";
 const storageKey = "tool:bingo-v1";
@@ -93,6 +93,7 @@ function mount(next) {
   workspace.hidden = false;
   share.hidden = !api;
   grid.style.setProperty("--bingo-columns", board.columns);
+  grid.style.setProperty("--bingo-rows", board.rows);
   grid.replaceChildren();
   editor.replaceChildren();
   editorRows = [];
@@ -196,9 +197,8 @@ async function sync() {
 
 function openSetup() {
   $("cancelSetup").hidden = !board;
-  if (board) {
-    $("boardRows").value = board.rows;
-    $("boardColumns").value = board.columns;
+  if (board && board.rows === board.columns && board.rows >= 4) {
+    $("boardSize").value = String(board.rows);
   }
   setup.showModal();
 }
@@ -213,11 +213,10 @@ $("cancelSetup").addEventListener("click", () => setup.close());
 setup.addEventListener("cancel", (event) => { if (!board) event.preventDefault(); });
 setupForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const rows = $("boardRows").valueAsNumber;
-  const columns = $("boardColumns").valueAsNumber;
-  if (!validDimensions(rows, columns)) return;
+  const size = Number($("boardSize").value);
+  if (!Number.isInteger(size) || size < 4 || size > 8) return;
   setRoom("");
-  mount(makeBoard(rows, columns));
+  mount(makeBoard(size, size));
   saveLocalBoard();
   setup.close();
 });
