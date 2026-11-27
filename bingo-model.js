@@ -5,7 +5,7 @@ export function validDimensions(rows, columns) {
 export function makeBoard(rows, columns) {
   return {
     rows, columns, revision: 0,
-    cells: Array.from({ length: rows * columns }, () => ({ label: "", mission: "", done: false })),
+    cells: Array.from({ length: rows * columns }, () => ({ label: "", mission: "", done: false, missionDone: false })),
   };
 }
 
@@ -15,7 +15,9 @@ export function validBoard(board) {
     Array.isArray(board.cells) && board.cells.length === board.rows * board.columns &&
     board.cells.every((cell) => cell && typeof cell.label === "string" && cell.label.length <= 20 &&
       typeof cell.mission === "string" && cell.mission.length <= 180 &&
-      typeof cell.done === "boolean" && (!cell.done || !!cell.label.trim())));
+      typeof cell.done === "boolean" && (!cell.done || !!cell.label.trim()) &&
+      (cell.missionDone === undefined || typeof cell.missionDone === "boolean") &&
+      (!cell.missionDone || !!cell.mission.trim())));
 }
 
 export function updateCell(board, { index, field, value }) {
@@ -23,11 +25,14 @@ export function updateCell(board, { index, field, value }) {
   const cell = board.cells[index];
   if (field === "done" && typeof value === "boolean" && (!value || cell.label.trim())) {
     cell.done = value;
+  } else if (field === "missionDone" && typeof value === "boolean" && (!value || cell.mission.trim())) {
+    cell.missionDone = value;
   } else if (field === "label" && typeof value === "string" && value.length <= 20) {
     cell.label = value.trim();
     if (!cell.label) cell.done = false;
   } else if (field === "mission" && typeof value === "string" && value.length <= 180) {
     cell.mission = value.trim();
+    if (!cell.mission) cell.missionDone = false;
   } else {
     return false;
   }

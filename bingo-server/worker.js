@@ -49,7 +49,7 @@ export default {
         method: "POST",
         body: JSON.stringify({
           rows: board.rows, columns: board.columns, revision: 0,
-          cells: board.cells.map(({ label, mission, done }) => ({ label, mission, done })),
+          cells: board.cells.map(({ label, mission, done, missionDone = false }) => ({ label, mission, done, missionDone })),
         }),
       });
       if (!response.ok) return Response.json({ error: "Room could not be created" }, { status: 503, headers });

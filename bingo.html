@@ -7,8 +7,8 @@
     <meta name="bingo-api" content="" />
     <link rel="icon" href="assets/favicon.png?v=1" />
     <link rel="stylesheet" href="styles.css?v=85" />
-    <link rel="stylesheet" href="bingo.css?v=2" />
-    <script type="module" src="bingo.js?v=2"></script>
+    <link rel="stylesheet" href="bingo.css?v=3" />
+    <script type="module" src="bingo.js?v=3"></script>
   </head>
   <body class="bingo-page">
     <main class="bingo-shell">
@@ -22,10 +22,12 @@
       <p id="bingoStatus" class="bingo-status" role="status"></p>
       <div id="bingoWorkspace" class="bingo-workspace" hidden>
         <section class="bingo-panel" aria-label="빙고판">
-          <div class="bingo-panel-heading bingo-board-summary">
-            <output id="completedLines" aria-live="polite"></output>
-          </div>
           <div id="bingoGrid" class="bingo-grid"></div>
+          <div class="bingo-board-summary" aria-live="polite">
+            <output id="completedLines"></output>
+            <output id="completedCells"></output>
+            <output id="completedMissions"></output>
+          </div>
         </section>
         <section class="bingo-panel" aria-labelledby="cellTitle">
           <div class="bingo-panel-heading">
