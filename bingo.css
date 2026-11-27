@@ -55,14 +55,16 @@
 .bingo-cell__label { grid-row: 2; overflow: hidden; overflow-wrap: anywhere; max-width: 100%; max-height: 100%; line-height: 1.05; font-size: clamp(9px, calc(var(--label-scale, 50) * .78cqw), 52px); font-weight: 850; }
 .bingo-cell--empty .bingo-cell__label { color: #788187; }
 .bingo-cell--mission { border-color: #b08037; box-shadow: inset 0 0 0 1px #b0803730; }
+.bingo-cell--done { background: #dceadf; border-color: #699574; }
 .bingo-cell__stamp {
-  grid-row: 3;
-  margin: 1px 2px 2px;
+  grid-row: 1;
+  justify-self: end;
+  margin: 2px 2px 1px;
   padding: 0 3px;
   border: 1px solid currentColor;
   border-radius: 3px;
-  background: #fff8ee;
-  color: #a33c32;
+  background: #f9e6e3;
+  color: #a3342c;
   font-size: clamp(7px, 16cqw, 13px);
   font-weight: 900;
   line-height: 1;
@@ -70,10 +72,9 @@
   transform: rotate(-6deg);
   pointer-events: none;
 }
-.bingo-cell__stamp.bingo-cell__mission { grid-row: 1; justify-self: end; margin: 2px 2px 1px; color: #805315; background: #f8ecd0; }
 .bingo-cell--mission-done .bingo-cell__mission { color: #255b3b; background: #e7f3e9; }
 @container (max-width: 42px) {
-  .bingo-cell__stamp, .bingo-cell__stamp.bingo-cell__mission { margin: 0; padding-inline: 1px; font-size: max(6px, 17cqw); transform: none; }
+  .bingo-cell__stamp { margin: 0; padding-inline: 1px; font-size: max(6px, 17cqw); transform: none; }
 }
 .bingo-cell--line { background: #f8e4b4; border-color: #ab7b28; box-shadow: inset 0 0 0 1px #ab7b28; }
 .bingo-cell--line .bingo-cell__label { color: #4d3312; }
@@ -88,7 +89,8 @@
 .bingo-mission-group {
   grid-column: 2 / -1;
   display: grid;
-  grid-template-columns: minmax(0, .8fr) 108px minmax(0, 2.5fr) max-content;
+  --balloon-field-width: 132px;
+  grid-template-columns: minmax(0, .8fr) var(--balloon-field-width) minmax(0, 2.5fr) max-content;
   align-items: end;
   gap: 6px;
   min-width: 0;
@@ -114,7 +116,7 @@
 }
 @container (max-width: 460px) {
   .bingo-editor-row { padding: 6px; }
-  .bingo-mission-group { grid-template-columns: minmax(0, 1fr) 108px; }
+  .bingo-mission-group { grid-template-columns: minmax(0, 1fr) var(--balloon-field-width); }
   .bingo-mission-group .bingo-button--missionDone { justify-self: end; }
 }
 @media (max-width: 430px) {

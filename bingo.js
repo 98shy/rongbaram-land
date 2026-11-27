@@ -1,4 +1,4 @@
-import { completedLines, hasMission, makeBoard, MAX_BALLOONS, updateCell, validBoard } from "./bingo-model.js?v=4";
+import { completedLines, hasMission, makeBoard, MAX_BALLOONS, updateCell, validBoard } from "./bingo-model.js?v=5";
 
 const api = document.querySelector('meta[name="bingo-api"]')?.content.replace(/\/$/, "") ?? "";
 const storageKey = "tool:bingo-v1";
@@ -12,6 +12,7 @@ const editor = $("cellEditor");
 const setup = $("boardSetup");
 const setupForm = $("setupForm");
 const share = $("shareBoard");
+const reset = $("resetBingoCells");
 const status = $("bingoStatus");
 const roomPattern = /^[a-f0-9]{48}$/;
 const requestedRoom = new URLSearchParams(location.hash.slice(1)).get("room");
@@ -89,9 +90,11 @@ async function request(path, method = "GET", payload) {
 function draw() {
   const lines = completedLines(board);
   const highlighted = new Set(lines.flat());
+  const doneCount = board.cells.filter((cell) => cell.done).length;
   $("completedLines").textContent = `${lines.length}줄 빙고`;
-  $("completedCells").textContent = `칸 성공 ${board.cells.filter((cell) => cell.done).length}/${board.cells.length}`;
+  $("completedCells").textContent = `칸 성공 ${doneCount}/${board.cells.length}`;
   $("completedMissions").textContent = `미션 성공 ${board.cells.filter((cell) => cell.missionDone).length}/${board.cells.filter(hasMission).length}`;
+  reset.disabled = !doneCount;
   board.cells.forEach((cell, index) => {
     const tile = tileElements[index];
     const row = editorRows[index];
@@ -101,7 +104,7 @@ function draw() {
     const missionExists = hasMission(cell);
     tile.mission.hidden = !missionExists;
     tile.mission.textContent = cell.missionDone ? "성공" : "미션";
-    tile.stamp.hidden = !cell.done;
+    tile.button.classList.toggle("bingo-cell--done", cell.done);
     tile.button.classList.toggle("bingo-cell--empty", !cell.label);
     tile.button.classList.toggle("bingo-cell--mission", missionExists);
     tile.button.classList.toggle("bingo-cell--mission-done", !!cell.missionDone);
@@ -132,6 +135,7 @@ function mount(next) {
   board = next;
   workspace.hidden = false;
   share.hidden = !api;
+  reset.hidden = false;
   grid.style.setProperty("--bingo-columns", board.columns);
   grid.style.setProperty("--bingo-rows", board.rows);
   grid.replaceChildren(lineLayer);
@@ -148,13 +152,9 @@ function mount(next) {
     const mission = document.createElement("span");
     mission.className = "bingo-cell__stamp bingo-cell__mission";
     mission.setAttribute("aria-hidden", "true");
-    const stamp = document.createElement("span");
-    stamp.className = "bingo-cell__stamp";
-    stamp.textContent = "성공";
-    stamp.setAttribute("aria-hidden", "true");
-    tile.append(label, mission, stamp);
+    tile.append(label, mission);
     grid.append(tile);
-    tileElements.push({ button: tile, label, mission, stamp });
+    tileElements.push({ button: tile, label, mission });
 
     const row = document.createElement("div");
     row.className = "bingo-editor-row";
@@ -295,6 +295,7 @@ $("newBoard").addEventListener("click", () => {
       !confirm("현재 빙고판을 새 판으로 바꿀까요?")) return;
   openSetup();
 });
+reset.addEventListener("click", () => applyEdit({ field: "resetDone", value: true }));
 $("cancelSetup").addEventListener("click", () => setup.close());
 setup.addEventListener("cancel", (event) => { if (!board) event.preventDefault(); });
 setupForm.addEventListener("submit", (event) => {

@@ -32,6 +32,13 @@ export function validBoard(board) {
 }
 
 export function updateCell(board, { index, field, value }) {
+  if (field === "resetDone" && value === true) {
+    if (board.cells.some((cell) => cell.done)) {
+      for (const cell of board.cells) cell.done = false;
+      board.revision += 1;
+    }
+    return true;
+  }
   if (!Number.isInteger(index) || index < 0 || index >= board.cells.length) return false;
   const cell = board.cells[index];
   if (field === "done" && typeof value === "boolean" && (!value || cell.label.trim())) {
