@@ -134,15 +134,15 @@ button { color: inherit; }
 .suweet-profile__stat-icon--subscription { color: #f45062; }
 .suweet-profile__stats dd { margin: 0; font-size: clamp(22px, 3vw, 30px); font-weight: 800; line-height: 1.3; font-variant-numeric: tabular-nums; }
 .suweet-profile__stats small { margin-left: 3px; color: var(--muted); font-size: 12px; }
-.suweet-profile__footer {
+.suweet-profile__links {
   grid-column: 1 / -1;
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
 .category-home__contact { display: flex; justify-content: flex-end; margin-top: 12px; }
-.suweet-profile__footer a,
+.suweet-profile__links a,
 .category-home__contact a { display: flex; align-items: center; gap: 7px; min-height: 38px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 700; }
-.suweet-profile__footer a:hover { border-color: var(--gold); }
+.suweet-profile__links a:hover { border-color: var(--gold); }
 .category-home__contact a { border-color: #cecff5; background: #f2f2ff; color: #333e93; }
 .category-home__contact a:hover { border-color: #5865f2; }
 .suweet-profile a:focus-visible,
