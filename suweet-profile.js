@@ -1,4 +1,4 @@
-async function loadSuweetStats() {
+async function loadSoopStats() {
   const endpoint = "https://api-channel.sooplive.com/v1.1/channel/suhee0051/station";
 
   try {
@@ -24,4 +24,28 @@ async function loadSuweetStats() {
   }
 }
 
-loadSuweetStats();
+async function loadYouTubeSubscribers() {
+  const endpoint = "https://api.socialcounts.org/youtube-live-subscriber-count/UCZtzLAQmS8U_Yegn4XYYYkQ";
+
+  try {
+    const response = await fetch(endpoint, { cache: "no-cache" });
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const subscribers = data?.counters?.api?.subscriberCount;
+    if (!Number.isSafeInteger(subscribers) || subscribers < 0) return;
+
+    const compactFormat = new Intl.NumberFormat("ko-KR", {
+      notation: "compact",
+      maximumFractionDigits: 2,
+    });
+    const count = document.getElementById("suweet-youtube-subscribers");
+    count.textContent = compactFormat.format(subscribers);
+    count.title = "유튜브 공개 구독자 수 · SocialCounts";
+  } catch {
+    // Keep the dated snapshot when the public count is unavailable.
+  }
+}
+
+loadSoopStats();
+loadYouTubeSubscribers();

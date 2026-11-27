@@ -36,7 +36,6 @@ button { color: inherit; }
 
 .category-home { min-height: 100vh; }
 .category-home__shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: clamp(24px, 5vw, 64px) 0 40px; }
-.category-home h1 { margin: 0 0 22px; font-size: clamp(30px, 5vw, 48px); line-height: 1.15; letter-spacing: -.045em; }
 .category-home__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .category-card {
   display: flex;
