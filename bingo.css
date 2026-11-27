@@ -56,7 +56,8 @@
 .bingo-cell--empty .bingo-cell__label { color: #788187; }
 .bingo-cell--mission { border-color: #b08037; box-shadow: inset 0 0 0 1px #b0803730; }
 .bingo-cell__stamp {
-  --stamp-outline: #522622;
+  --stamp-outline: #73231e;
+  --stamp-hue: -48deg;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -83,13 +84,14 @@
   height: 100%;
   object-fit: contain;
   filter:
+    grayscale(1) brightness(.64) sepia(1) saturate(5) hue-rotate(var(--stamp-hue))
     drop-shadow(1px 0 var(--stamp-outline))
     drop-shadow(-1px 0 var(--stamp-outline))
     drop-shadow(0 1px var(--stamp-outline))
     drop-shadow(0 -1px var(--stamp-outline));
 }
 .bingo-cell__stamp span { paint-order: stroke fill; -webkit-text-stroke: 2px #fffaf2; }
-.bingo-cell--mission-done .bingo-cell__mission { --stamp-outline: #183b29; color: #205b39; }
+.bingo-cell--mission-done .bingo-cell__mission { --stamp-outline: #17482c; --stamp-hue: 83deg; color: #205b39; }
 @container (max-width: 42px) {
   .bingo-cell__stamp { margin: 0; font-size: max(6px, 17cqw); transform: none; }
 }
