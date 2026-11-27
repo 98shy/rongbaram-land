@@ -1,4 +1,4 @@
-import { completedLines, hasMission, makeBoard, MAX_BALLOONS, updateCell, validBoard } from "./bingo-model.js?v=5";
+import { completedLines, hasDuplicateLabel, hasMission, makeBoard, MAX_BALLOONS, updateCell, validBoard } from "./bingo-model.js?v=6";
 
 const api = document.querySelector('meta[name="bingo-api"]')?.content.replace(/\/$/, "") ?? "";
 const storageKey = "tool:bingo-v1";
@@ -83,7 +83,11 @@ async function request(path, method = "GET", payload) {
     body: payload ? JSON.stringify(payload) : undefined,
     signal: AbortSignal.timeout(8000),
   });
-  if (!response.ok) throw new Error(`빙고 서버 ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(`빙고 서버 ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
   return response.json();
 }
 
@@ -103,7 +107,7 @@ function draw() {
     tile.label.style.setProperty("--label-scale", String(Math.max(23, Math.min(56, 110 / Math.max(1, labelLength)))));
     const missionExists = hasMission(cell);
     tile.mission.hidden = !missionExists;
-    tile.mission.textContent = cell.missionDone ? "성공" : "미션";
+    tile.missionText.textContent = cell.missionDone ? "성공" : "미션";
     tile.button.classList.toggle("bingo-cell--done", cell.done);
     tile.button.classList.toggle("bingo-cell--empty", !cell.label);
     tile.button.classList.toggle("bingo-cell--mission", missionExists);
@@ -152,9 +156,14 @@ function mount(next) {
     const mission = document.createElement("span");
     mission.className = "bingo-cell__stamp bingo-cell__mission";
     mission.setAttribute("aria-hidden", "true");
+    const icon = document.createElement("img");
+    icon.src = "assets/favicon.png?v=1";
+    icon.alt = "";
+    const missionText = document.createElement("span");
+    mission.append(icon, missionText);
     tile.append(label, mission);
     grid.append(tile);
-    tileElements.push({ button: tile, label, mission });
+    tileElements.push({ button: tile, label, mission, missionText });
 
     const row = document.createElement("div");
     row.className = "bingo-editor-row";
@@ -238,7 +247,17 @@ function mount(next) {
   draw();
 }
 
+function showDuplicateLabel({ index, value }) {
+  const input = editorRows[index].inputs.label;
+  if (input.value === value) input.value = board.cells[index].label;
+  status.textContent = `${index + 1}번 칸 · 이미 사용 중인 숫자나 글자입니다.`;
+}
+
 function applyEdit(patch) {
+  if (patch.field === "label" && hasDuplicateLabel(board, patch.index, patch.value)) {
+    showDuplicateLabel(patch);
+    return;
+  }
   if (!room) {
     if (updateCell(board, patch)) {
       saveLocalBoard();
@@ -256,8 +275,12 @@ function applyEdit(patch) {
       draw();
       status.textContent = "공유 중 · 변경사항 저장됨";
     }
-  }).catch(() => {
+  }).catch((error) => {
     if (room === targetRoom) {
+      if (patch.field === "label" && error.status === 409) {
+        showDuplicateLabel(patch);
+        return;
+      }
       draw();
       status.textContent = "변경사항을 저장하지 못했습니다. 해당 칸을 다시 입력해 주세요.";
     }

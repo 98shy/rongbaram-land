@@ -1,4 +1,4 @@
-import { updateCell, validBoard } from "../bingo-model.js";
+import { hasDuplicateLabel, updateCell, validBoard } from "../bingo-model.js";
 
 const ROOM_TOKEN = /^[a-f0-9]{48}$/;
 
@@ -96,6 +96,9 @@ export class BingoRoom {
     if (!stored) return Response.json({ error: "Room not found" }, { status: 404 });
     const board = JSON.parse(stored.board);
     if (request.method === "PATCH") {
+      if (payload.field === "label" && hasDuplicateLabel(board, payload.index, payload.value)) {
+        return Response.json({ error: "Duplicate label" }, { status: 409 });
+      }
       if (!updateCell(board, payload)) return Response.json({ error: "Invalid edit" }, { status: 400 });
       this.sql.exec("UPDATE state SET board = ? WHERE id = 1", JSON.stringify(board));
     }

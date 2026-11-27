@@ -18,6 +18,16 @@ export function hasMission(cell) {
 const validBalloons = (value) => typeof value === "string" && /^\d{0,9}$/.test(value);
 export const MAX_BALLOONS = 999_999_999;
 
+function labelKey(value) {
+  return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("ko-KR");
+}
+
+export function hasDuplicateLabel(board, index, value) {
+  if (typeof value !== "string") return false;
+  const key = labelKey(value);
+  return !!key && board.cells.some((cell, otherIndex) => otherIndex !== index && labelKey(cell.label) === key);
+}
+
 export function validBoard(board) {
   return Boolean(board && validDimensions(board.rows, board.columns) &&
     Number.isSafeInteger(board.revision) && board.revision >= 0 &&
@@ -46,6 +56,7 @@ export function updateCell(board, { index, field, value }) {
   } else if (field === "missionDone" && typeof value === "boolean" && (!value || hasMission(cell))) {
     cell.missionDone = value;
   } else if (field === "label" && typeof value === "string" && value.length <= 20) {
+    if (hasDuplicateLabel(board, index, value)) return false;
     cell.label = value.trim();
     if (!cell.label) cell.done = false;
   } else if (field === "mission" && typeof value === "string" && value.length <= 180) {
