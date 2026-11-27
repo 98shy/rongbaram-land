@@ -7,8 +7,8 @@
     <title>For SUWEET</title>
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=1" />
-    <link rel="stylesheet" href="styles.css?v=86" />
-    <script src="suweet-profile.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=87" />
+    <script src="suweet-profile.js?v=2" defer></script>
   </head>
   <body class="category-home">
     <main class="category-home__shell">
@@ -42,9 +42,9 @@
         <div class="suweet-profile__identity">
           <img class="suweet-profile__photo" src="https://profile.img.sooplive.com/LOGO/su/suhee0051/suhee0051.jpg" alt="수힛 프로필 사진" width="112" height="112" />
           <div>
-            <h2 id="suweet-name">수힛</h2>
+            <h2 id="suweet-name">수힛 <span class="suweet-profile__badge">베스트</span></h2>
             <ul class="suweet-profile__dates">
-              <li><time datetime="2018-11-04">#2018.11.4~</time></li>
+              <li><time datetime="2018-11-04"># 2018.11.4~</time></li>
               <li><span aria-hidden="true">🎂</span> <time datetime="1996-03-05" aria-label="생일 1996년 3월 5일">1996.03.05</time></li>
             </ul>
           </div>
@@ -53,19 +53,34 @@
         <div>
           <dl class="suweet-profile__stats">
             <div>
-              <dt><span class="suweet-profile__stat-icon--favorite" aria-hidden="true">★</span> SOOP 즐겨찾기</dt>
-              <dd><span id="suweet-favorites">86,007</span><small>명</small></dd>
+              <dt>
+                <svg class="suweet-profile__stat-icon suweet-profile__stat-icon--favorite" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m12 2.5 2.8 5.7 6.3.9-4.55 4.44 1.08 6.27L12 16.85l-5.63 2.96 1.08-6.27L2.9 9.1l6.3-.9Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+                </svg>
+                즐겨찾기
+              </dt>
+              <dd id="suweet-favorites">8.6만</dd>
             </div>
             <div>
-              <dt><span class="suweet-profile__stat-icon--subscription" aria-hidden="true">♥</span> SOOP 구독</dt>
+              <dt>
+                <svg class="suweet-profile__stat-icon suweet-profile__stat-icon--subscription" viewBox="0 0 26 24" aria-hidden="true">
+                  <path d="M19.5 6.5h1a4.5 4.5 0 0 1 0 9h-2" fill="none" stroke="currentColor" stroke-width="2" />
+                  <path d="M5 2h11a5 5 0 0 1 5 5v5a10.5 10.5 0 0 1-21 0V7a5 5 0 0 1 5-5Z M10.5 6.8l1.7 3.2 3.55.6-2.5 2.5.55 3.5-3.3-1.6-3.3 1.6.55-3.5-2.5-2.5 3.55-.6Z" fill="currentColor" fill-rule="evenodd" />
+                </svg>
+                구독
+              </dt>
               <dd><span id="suweet-subscriptions">92</span><small>명</small></dd>
+            </div>
+            <div>
+              <dt><span class="suweet-profile__icon suweet-profile__icon--youtube" aria-hidden="true"></span> <a href="https://www.youtube.com/channel/UCZtzLAQmS8U_Yegn4XYYYkQ" target="_blank" rel="noopener noreferrer" aria-label="유튜브 구독자수">구독자수</a></dt>
+              <dd>9.71만</dd>
             </div>
           </dl>
           <p class="suweet-profile__source" id="suweet-stats-source">SOOP · 2026.11.28 기준</p>
         </div>
 
         <ul class="suweet-profile__links" aria-label="수힛 채널">
-          <li><a href="https://www.sooplive.com/station/suhee0051" target="_blank" rel="noopener noreferrer"><span class="suweet-profile__icon suweet-profile__icon--soop" aria-hidden="true">S</span> SOOP 방송국</a></li>
+          <li><a href="https://www.sooplive.com/station/suhee0051" target="_blank" rel="noopener noreferrer"><img src="assets/soop-icon.svg" width="19" height="19" alt="" /> SOOP 방송국</a></li>
           <li><a href="https://www.instagram.com/suweet.co.kr/" target="_blank" rel="noopener noreferrer"><span class="suweet-profile__icon suweet-profile__icon--instagram" aria-hidden="true"></span> 인스타그램</a></li>
           <li><a href="https://www.youtube.com/channel/UCZtzLAQmS8U_Yegn4XYYYkQ" target="_blank" rel="noopener noreferrer"><span class="suweet-profile__icon suweet-profile__icon--youtube" aria-hidden="true"></span> 유튜브</a></li>
         </ul>

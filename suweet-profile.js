@@ -12,7 +12,11 @@ async function loadSuweetStats() {
         !Number.isSafeInteger(subscriptions) || subscriptions < 0) return;
 
     const numberFormat = new Intl.NumberFormat("ko-KR");
-    document.getElementById("suweet-favorites").textContent = numberFormat.format(favorites);
+    const compactFormat = new Intl.NumberFormat("ko-KR", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    });
+    document.getElementById("suweet-favorites").textContent = compactFormat.format(favorites);
     document.getElementById("suweet-subscriptions").textContent = numberFormat.format(subscriptions);
     document.getElementById("suweet-stats-source").textContent = "SOOP · 페이지를 열 때 갱신";
   } catch {
