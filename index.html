@@ -3,229 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="리그 오브 레전드 챔피언 사용 현황을 한눈에 기록하는 체크리스트" />
-    <title>룽바람 랜드</title>
+    <meta name="description" content="배틀그라운드, 룽바람 랜드, 편의 기능" />
+    <title>FOR SUWEET</title>
     <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png?v=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=1" />
-    <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
-    <link rel="preload" as="image" href="assets/hero-aram-land-v3.jpg" />
-    <link rel="stylesheet" href="styles.css?v=76" />
-    <script src="app.js?v=26" defer></script>
+    <link rel="stylesheet" href="styles.css?v=84" />
   </head>
-  <body>
-    <div class="app-shell">
-      <nav class="page-actions" aria-label="페이지 이동">
-        <details class="page-menu">
-          <summary><span class="page-menu__icon" aria-hidden="true"></span><span class="page-menu__label">메뉴</span><span class="page-menu__arrow" aria-hidden="true"></span></summary>
-          <div class="page-menu__items">
-            <a class="memo-link" href="history.html" target="_blank" rel="noopener noreferrer" aria-label="랜드 전적을 새 탭에서 열기">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
-              </svg>
-              랜드 전적
-            </a>
-            <a class="memo-link" href="mixer.html" target="_blank" rel="noopener noreferrer" aria-label="팀 섞기를 새 탭에서 열기">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h3c4.5 0 5.5 10 10 10h3M17 4l3 3-3 3M4 17h3c1.5 0 2.6-1.1 3.6-2.6M17 14l3 3-3 3M13.4 9.6C14.4 8.1 15.5 7 17 7h3" />
-              </svg>
-              팀 섞기
-            </a>
-            <a class="memo-link" href="memo.html" target="_blank" rel="noopener noreferrer" aria-label="메모장을 새 탭에서 열기">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 3.75h9.5L19 7.25v13H6zM15.5 3.75v3.5H19M9 11h7M9 15h7" />
-              </svg>
-              메모장
-            </a>
-            <a class="memo-link" href="categories.html">카테고리</a>
-          </div>
-        </details>
-      </nav>
-      <header class="hero">
-        <div class="hero__brand">
-          <h1>룽바람 랜드</h1>
-          <p>사용한 챔피언을 제외하고 현재 승패를 기록하세요.</p>
-        </div>
-
-        <div class="hero__dashboard">
-          <section class="record-card" aria-label="현재 승패 기록">
-            <div class="record-card__summary">
-              <div class="record-card__current">
-                <span class="record-card__label">현재 전적</span>
-                <strong><span id="winCount">0</span>승 <span id="lossCount">0</span>패</strong>
-              </div>
-              <div class="record-card__summary-actions">
-                <div class="win-rate">
-                  <span>승률</span>
-                  <strong id="winRate">—</strong>
-                </div>
-                <button id="recordSaveButton" class="record-action-button record-save" type="button">전적 저장</button>
-              </div>
-            </div>
-            <div class="record-card__controls">
-              <div class="score-control score-control--win">
-                <span>승리</span>
-                <button type="button" data-record="win" data-delta="-1" aria-label="승리 1회 줄이기">−</button>
-                <strong id="winControlCount">0</strong>
-                <button type="button" data-record="win" data-delta="1" aria-label="승리 1회 추가">+</button>
-              </div>
-              <div class="score-control score-control--loss">
-                <span>패배</span>
-                <button type="button" data-record="loss" data-delta="-1" aria-label="패배 1회 줄이기">−</button>
-                <strong id="lossControlCount">0</strong>
-                <button type="button" data-record="loss" data-delta="1" aria-label="패배 1회 추가">+</button>
-              </div>
-              <button id="recordResetButton" class="record-action-button record-reset" type="button">전적 초기화</button>
-            </div>
-            <div class="settlement">
-              <div class="settlement__stake">
-                <span>판당 별풍선</span>
-                <strong id="stakeCount">100개</strong>
-              </div>
-              <div id="stakeControls" class="stake-controls" aria-label="판당 별풍선 조절">
-                <button type="button" data-stake-delta="-1000" aria-label="판당 별풍선 1000개 줄이기">−1천</button>
-                <button type="button" data-stake-delta="-100" aria-label="판당 별풍선 100개 줄이기">−100</button>
-                <button type="button" data-stake-delta="100" aria-label="판당 별풍선 100개 늘리기">+100</button>
-                <button type="button" data-stake-delta="1000" aria-label="판당 별풍선 1000개 늘리기">+1천</button>
-              </div>
-              <div class="settlement__result">
-                <span>최종 결산</span>
-                <strong id="settlementResult" aria-live="polite">0개</strong>
-              </div>
-            </div>
-          </section>
-        </div>
-      </header>
-
-      <main>
-        <section class="toolbar" aria-label="챔피언 목록 필터">
-          <div class="search-row">
-            <div class="search-wrap">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3m2.3-5.2A7.5 7.5 0 1 1 4 11.5a7.5 7.5 0 0 1 15 0Z" /></svg>
-              <label class="sr-only" for="searchInput">챔피언 검색</label>
-              <input id="searchInput" type="search" placeholder="챔피언 이름 검색" autocomplete="off" />
-              <kbd>/</kbd>
-            </div>
-          </div>
-
-          <div id="roleFilters" class="filter-row" aria-label="역할군 필터">
-            <button class="filter-chip is-active" type="button" data-role="all">전체</button>
-            <button class="filter-chip" type="button" data-role="Tank">탱커</button>
-            <button class="filter-chip" type="button" data-role="Fighter">전사</button>
-            <button class="filter-chip" type="button" data-role="Assassin">암살자</button>
-            <button class="filter-chip" type="button" data-role="Mage">마법사</button>
-            <button class="filter-chip" type="button" data-role="Marksman">원거리</button>
-            <button class="filter-chip" type="button" data-role="Support">서포터</button>
-            <button id="matchHistoryButton" class="record-history-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="matchHistoryDialog">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 4.5h14v15H5zM8 8h8M8 12h8M8 16h5" />
-              </svg>
-              전적 기록
-              <span id="matchHistoryBadge" class="record-history-button__badge" hidden>0</span>
-            </button>
-          </div>
-
-          <div id="mappingStatus" class="mapping-status" hidden>
-            <span id="mappingStatusText"></span>
-            <button id="cancelChampionChangeButton" type="button" hidden>변경 취소</button>
-          </div>
-
-          <div class="toolbar__bottom">
-            <div id="statusFilters" class="segmented" aria-label="사용 상태 필터">
-              <button class="is-active" type="button" data-status="all">모두</button>
-              <button type="button" data-status="unused">미사용</button>
-              <button type="button" data-status="used">사용 완료</button>
-            </div>
-            <div class="toolbar__actions">
-              <span id="resultCount" class="result-count"></span>
-              <button id="undoButton" class="text-button" type="button" disabled>실행 취소</button>
-              <button id="resetButton" class="text-button text-button--danger" type="button">전체 초기화</button>
-            </div>
-          </div>
+  <body class="category-home">
+    <main class="category-home__shell">
+      <h1>TOOL</h1>
+      <div class="category-home__grid">
+        <section class="category-card category-card--pubg" aria-labelledby="pubg-category">
+          <h2 id="pubg-category">배틀그라운드</h2>
+          <p>준비 중</p>
         </section>
 
-        <section aria-live="polite">
-          <div id="loadingState" class="state-card">
-            <span class="spinner" aria-hidden="true"></span>
-            <strong>챔피언을 불러오는 중...</strong>
-            <p>Riot Data Dragon에서 최신 명단을 확인하고 있습니다.</p>
-          </div>
-          <div id="errorState" class="state-card state-card--error" hidden>
-            <strong>챔피언 정보를 불러오지 못했어요.</strong>
-            <p>인터넷 연결을 확인한 뒤 다시 시도해 주세요.</p>
-            <button id="retryButton" type="button">다시 시도</button>
-          </div>
-          <div id="emptyState" class="state-card" hidden>
-            <strong>조건에 맞는 챔피언이 없어요.</strong>
-            <p>검색어나 필터를 바꿔보세요.</p>
-          </div>
-          <div id="championGrid" class="champion-grid" aria-label="챔피언 목록"></div>
+        <section class="category-card category-card--land" aria-labelledby="land-category">
+          <h2 id="land-category">룽바람 랜드</h2>
+          <ul>
+            <li><a href="rongbaram.html">룽바람 랜드</a></li>
+            <li><a href="mixer.html">팀 섞기</a></li>
+            <li><a href="history.html">랜드 전적</a></li>
+          </ul>
         </section>
-      </main>
 
-      <footer>
-        <span id="patchInfo">Data Dragon 연결 중</span>
-        <span>개인용 팬 프로젝트 · Riot Games와 제휴 또는 보증 관계가 없습니다.</span>
-      </footer>
-    </div>
-
-    <a
-      class="stream-banner stream-banner--left"
-      href="https://www.youtube.com/@%EC%88%98%ED%9E%9B"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="수힛 YouTube 채널 새 탭에서 열기"
-      title="수힛 YouTube 채널 바로가기"
-    >
-      <img
-        src="assets/youtube-banner-v2.jpg"
-        width="360"
-        height="945"
-        alt="마법사 고양이 캐릭터—수힛 YouTube 채널 바로가기"
-      />
-    </a>
-
-    <a
-      class="stream-banner stream-banner--right"
-      href="https://www.sooplive.com/station/suhee0051"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="SOOP LIVE 방송국 새 탭에서 열기"
-      title="SOOP LIVE 방송국 바로가기"
-    >
-      <img
-        src="assets/soop-live-banner-v2.jpg"
-        width="360"
-        height="945"
-        alt="얼음 협곡의 고양이 캐릭터—SOOP LIVE 방송국 바로가기"
-      />
-    </a>
-
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <div id="championTooltip" class="champion-tooltip" role="tooltip" hidden></div>
-
-    <dialog id="matchHistoryDialog" class="match-dialog" aria-labelledby="matchHistoryTitle">
-      <div class="match-dialog__header">
-        <div>
-          <h2 id="matchHistoryTitle">전적 기록</h2>
-        </div>
-        <button id="matchHistoryCloseButton" class="match-dialog__close" type="button" aria-label="전적 기록 닫기">×</button>
-      </div>
-      <div class="match-dialog__body">
-        <section class="match-dialog__section" aria-labelledby="pendingMatchTitle" hidden>
-          <div class="match-dialog__section-title">
-            <h3 id="pendingMatchTitle">매핑 대기</h3>
-            <span id="pendingMatchCount">0개</span>
-          </div>
-          <div id="pendingMatchList" class="pending-match-list"></div>
-        </section>
-        <section class="match-dialog__section" aria-labelledby="completedMatchTitle">
-          <div class="match-dialog__section-title">
-            <h3 id="completedMatchTitle">완료된 기록</h3>
-            <span id="completedMatchCount">0경기</span>
-          </div>
-          <div id="completedMatchList" class="completed-match-list"></div>
+        <section class="category-card category-card--tools" aria-labelledby="tools-category">
+          <h2 id="tools-category">편의 기능</h2>
+          <ul>
+            <li><a href="memo.html">메모장</a></li>
+          </ul>
         </section>
       </div>
-    </dialog>
+    </main>
   </body>
 </html>

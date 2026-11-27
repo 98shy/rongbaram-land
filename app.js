@@ -1164,17 +1164,6 @@ ui.completedMatchList.addEventListener("click", (event) => {
   }
 });
 
-const pageMenu = document.querySelector(".page-menu");
-document.addEventListener("pointerdown", (event) => {
-  if (pageMenu.open && !pageMenu.contains(event.target)) pageMenu.open = false;
-});
-pageMenu.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    pageMenu.open = false;
-    pageMenu.querySelector("summary").focus();
-  }
-});
-
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && ui.matchHistoryDialog.open) {
     closeMatchHistory();
