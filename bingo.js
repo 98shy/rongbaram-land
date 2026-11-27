@@ -1,4 +1,4 @@
-import { completedLines, makeBoard, updateCell, validBoard } from "./bingo-model.js?v=2";
+import { completedLines, hasMission, makeBoard, updateCell, validBoard } from "./bingo-model.js?v=3";
 
 const api = document.querySelector('meta[name="bingo-api"]')?.content.replace(/\/$/, "") ?? "";
 const storageKey = "tool:bingo-v1";
@@ -91,30 +91,34 @@ function draw() {
   const highlighted = new Set(lines.flat());
   $("completedLines").textContent = `${lines.length}줄 빙고`;
   $("completedCells").textContent = `칸 성공 ${board.cells.filter((cell) => cell.done).length}/${board.cells.length}`;
-  $("completedMissions").textContent = `미션 성공 ${board.cells.filter((cell) => cell.missionDone).length}/${board.cells.filter((cell) => cell.mission).length}`;
+  $("completedMissions").textContent = `미션 성공 ${board.cells.filter((cell) => cell.missionDone).length}/${board.cells.filter(hasMission).length}`;
   board.cells.forEach((cell, index) => {
     const tile = tileElements[index];
     const row = editorRows[index];
     tile.label.textContent = cell.label || "—";
     const labelLength = [...cell.label].length;
     tile.label.style.setProperty("--label-scale", String(Math.max(23, Math.min(56, 110 / Math.max(1, labelLength)))));
-    tile.mission.hidden = !cell.mission;
-    tile.mission.textContent = cell.missionDone ? "★" : "☆";
+    const missionExists = hasMission(cell);
+    tile.mission.hidden = !missionExists;
+    tile.mission.textContent = cell.missionDone ? "성공" : "미션";
     tile.stamp.hidden = !cell.done;
     tile.button.classList.toggle("bingo-cell--empty", !cell.label);
-    tile.button.classList.toggle("bingo-cell--mission", !!cell.mission);
+    tile.button.classList.toggle("bingo-cell--mission", missionExists);
+    tile.button.classList.toggle("bingo-cell--mission-done", !!cell.missionDone);
     tile.button.classList.toggle("bingo-cell--line", highlighted.has(index));
     const description = [
-      `${index + 1}번 칸`, cell.label || "미입력", cell.mission,
+      `${index + 1}번 칸`, cell.label || "미입력", cell.missionName,
+      cell.missionBalloons && `별풍선 ${Number(cell.missionBalloons).toLocaleString("ko-KR")}개`, cell.mission,
       cell.done && "칸 성공", cell.missionDone && "미션 성공", highlighted.has(index) && "빙고 완성",
     ].filter(Boolean).join(" · ");
     tile.button.title = description;
     tile.button.setAttribute("aria-label", description);
-    if (document.activeElement !== row.label) row.label.value = cell.label;
-    if (document.activeElement !== row.mission) row.mission.value = cell.mission;
+    for (const [field, input] of Object.entries(row.inputs)) {
+      if (document.activeElement !== input) input.value = cell[field] ?? "";
+    }
     row.done.disabled = !cell.label.trim();
     row.done.setAttribute("aria-pressed", String(cell.done));
-    row.missionDone.disabled = !cell.mission.trim();
+    row.missionDone.disabled = !missionExists;
     row.missionDone.setAttribute("aria-pressed", String(!!cell.missionDone));
   });
   drawLines(lines);
@@ -153,13 +157,19 @@ function mount(next) {
     const number = document.createElement("span");
     number.textContent = String(index + 1);
     row.append(number);
+    const inputs = {};
     function addField(field, title, maxLength) {
       const wrapper = document.createElement("label");
+      wrapper.dataset.field = field;
       wrapper.textContent = title;
       const input = document.createElement("input");
       input.type = "text";
       input.maxLength = maxLength;
       input.required = field === "label";
+      if (field === "missionBalloons") {
+        input.inputMode = "numeric";
+        input.addEventListener("input", () => { input.value = input.value.replace(/\D/g, ""); });
+      }
       input.setAttribute("aria-label", `${index + 1}번 칸 ${title}`);
       input.addEventListener("change", () => applyEdit({ index, field, value: input.value }));
       input.addEventListener("keydown", (event) => {
@@ -167,28 +177,35 @@ function mount(next) {
       });
       wrapper.append(input);
       row.append(wrapper);
+      inputs[field] = input;
       return input;
     }
     const labelInput = addField("label", "숫자·글자 (필수)", 20);
-    const missionInput = addField("mission", "미션 (선택)", 180);
+    const missionNameInput = addField("missionName", "닉네임", 40);
+    const balloonsInput = addField("missionBalloons", "별풍선 개수", 9);
+    const missionInput = addField("mission", "미션 내용", 180);
     const actions = document.createElement("div");
     actions.className = "bingo-editor-actions";
-    function addSuccess(field, title, input) {
+    function addSuccess(field, title, relatedInputs) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `bingo-button bingo-button--${field}`;
       button.textContent = title;
       button.setAttribute("aria-label", `${index + 1}번 칸 ${title}`);
-      input.addEventListener("input", () => { button.disabled = !input.value.trim(); });
+      for (const input of relatedInputs) {
+        input.addEventListener("input", () => {
+          button.disabled = !relatedInputs.some((item) => item.value.trim());
+        });
+      }
       button.addEventListener("click", () => applyEdit({ index, field, value: !board.cells[index][field] }));
       actions.append(button);
       return button;
     }
-    const done = addSuccess("done", "칸 성공", labelInput);
-    const missionDone = addSuccess("missionDone", "미션 성공", missionInput);
+    const done = addSuccess("done", "칸 성공", [labelInput]);
+    const missionDone = addSuccess("missionDone", "미션 성공", [missionNameInput, balloonsInput, missionInput]);
     row.append(actions);
     editor.append(row);
-    editorRows.push({ label: labelInput, mission: missionInput, done, missionDone });
+    editorRows.push({ inputs, done, missionDone });
     tile.addEventListener("click", () => labelInput.focus());
   });
   draw();
@@ -247,7 +264,7 @@ function openSetup() {
 
 $("newBoard").addEventListener("click", () => {
   if (connecting || pending) return;
-  if (board && !room && board.cells.some((cell) => cell.label || cell.mission) &&
+  if (board && !room && board.cells.some((cell) => cell.label || hasMission(cell)) &&
       !confirm("현재 빙고판을 새 판으로 바꿀까요?")) return;
   openSetup();
 });
