@@ -16,6 +16,7 @@ export function hasMission(cell) {
 }
 
 const validBalloons = (value) => typeof value === "string" && /^\d{0,9}$/.test(value);
+export const MAX_BALLOONS = 999_999_999;
 
 export function validBoard(board) {
   return Boolean(board && validDimensions(board.rows, board.columns) &&
@@ -46,6 +47,9 @@ export function updateCell(board, { index, field, value }) {
     cell.missionName = value.trim();
   } else if (field === "missionBalloons" && validBalloons(value)) {
     cell.missionBalloons = value === "" ? "" : String(Number(value));
+  } else if (field === "missionBalloonsDelta" && (value === 100 || value === -100)) {
+    const count = Math.min(MAX_BALLOONS, Math.max(0, Number(cell.missionBalloons || 0) + value));
+    cell.missionBalloons = count ? String(count) : "";
   } else {
     return false;
   }

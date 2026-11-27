@@ -1,4 +1,4 @@
-import { completedLines, hasMission, makeBoard, updateCell, validBoard } from "./bingo-model.js?v=3";
+import { completedLines, hasMission, makeBoard, MAX_BALLOONS, updateCell, validBoard } from "./bingo-model.js?v=4";
 
 const api = document.querySelector('meta[name="bingo-api"]')?.content.replace(/\/$/, "") ?? "";
 const storageKey = "tool:bingo-v1";
@@ -116,6 +116,10 @@ function draw() {
     for (const [field, input] of Object.entries(row.inputs)) {
       if (document.activeElement !== input) input.value = cell[field] ?? "";
     }
+    const balloons = Number(cell.missionBalloons || 0);
+    row.balloons.output.textContent = `${balloons.toLocaleString("ko-KR")}개`;
+    row.balloons.minus.disabled = balloons === 0;
+    row.balloons.plus.disabled = balloons > MAX_BALLOONS - 100;
     row.done.disabled = !cell.label.trim();
     row.done.setAttribute("aria-pressed", String(cell.done));
     row.missionDone.disabled = !missionExists;
@@ -142,7 +146,7 @@ function mount(next) {
     const label = document.createElement("span");
     label.className = "bingo-cell__label";
     const mission = document.createElement("span");
-    mission.className = "bingo-cell__mission";
+    mission.className = "bingo-cell__stamp bingo-cell__mission";
     mission.setAttribute("aria-hidden", "true");
     const stamp = document.createElement("span");
     stamp.className = "bingo-cell__stamp";
@@ -158,7 +162,7 @@ function mount(next) {
     number.textContent = String(index + 1);
     row.append(number);
     const inputs = {};
-    function addField(field, title, maxLength) {
+    function addField(parent, field, title, maxLength) {
       const wrapper = document.createElement("label");
       wrapper.dataset.field = field;
       wrapper.textContent = title;
@@ -166,27 +170,18 @@ function mount(next) {
       input.type = "text";
       input.maxLength = maxLength;
       input.required = field === "label";
-      if (field === "missionBalloons") {
-        input.inputMode = "numeric";
-        input.addEventListener("input", () => { input.value = input.value.replace(/\D/g, ""); });
-      }
       input.setAttribute("aria-label", `${index + 1}번 칸 ${title}`);
       input.addEventListener("change", () => applyEdit({ index, field, value: input.value }));
       input.addEventListener("keydown", (event) => {
         if (event.key === "Enter" && !event.isComposing) input.blur();
       });
       wrapper.append(input);
-      row.append(wrapper);
+      parent.append(wrapper);
       inputs[field] = input;
       return input;
     }
-    const labelInput = addField("label", "숫자·글자 (필수)", 20);
-    const missionNameInput = addField("missionName", "닉네임", 40);
-    const balloonsInput = addField("missionBalloons", "별풍선 개수", 9);
-    const missionInput = addField("mission", "미션 내용", 180);
-    const actions = document.createElement("div");
-    actions.className = "bingo-editor-actions";
-    function addSuccess(field, title, relatedInputs) {
+    const labelInput = addField(row, "label", "숫자·글자 (필수)", 20);
+    function addSuccess(parent, field, title, relatedInputs) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `bingo-button bingo-button--${field}`;
@@ -194,18 +189,50 @@ function mount(next) {
       button.setAttribute("aria-label", `${index + 1}번 칸 ${title}`);
       for (const input of relatedInputs) {
         input.addEventListener("input", () => {
-          button.disabled = !relatedInputs.some((item) => item.value.trim());
+          button.disabled = !relatedInputs.some((item) => item.value.trim()) &&
+            !(field === "missionDone" && Number(board.cells[index].missionBalloons));
         });
       }
       button.addEventListener("click", () => applyEdit({ index, field, value: !board.cells[index][field] }));
-      actions.append(button);
+      parent.append(button);
       return button;
     }
-    const done = addSuccess("done", "칸 성공", [labelInput]);
-    const missionDone = addSuccess("missionDone", "미션 성공", [missionNameInput, balloonsInput, missionInput]);
-    row.append(actions);
+    const done = addSuccess(row, "done", "칸 성공", [labelInput]);
+    const missionGroup = document.createElement("fieldset");
+    missionGroup.className = "bingo-mission-group";
+    const legend = document.createElement("legend");
+    legend.textContent = "미션";
+    missionGroup.append(legend);
+    const missionNameInput = addField(missionGroup, "missionName", "닉네임", 40);
+
+    const balloonField = document.createElement("div");
+    balloonField.className = "bingo-balloon-field";
+    balloonField.textContent = "별풍선 개수";
+    const balloonControls = document.createElement("div");
+    balloonControls.className = "bingo-balloon-controls";
+    balloonControls.setAttribute("role", "group");
+    balloonControls.setAttribute("aria-label", `${index + 1}번 칸 미션 별풍선 개수`);
+    const balloonOutput = document.createElement("output");
+    function balloonButton(delta) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "bingo-button";
+      button.textContent = delta > 0 ? "+100" : "−100";
+      button.setAttribute("aria-label", `별풍선 100개 ${delta > 0 ? "올리기" : "내리기"}`);
+      button.addEventListener("click", () => applyEdit({ index, field: "missionBalloonsDelta", value: delta }));
+      return button;
+    }
+    const minus = balloonButton(-100);
+    const plus = balloonButton(100);
+    balloonControls.append(minus, balloonOutput, plus);
+    balloonField.append(balloonControls);
+    missionGroup.append(balloonField);
+
+    const missionInput = addField(missionGroup, "mission", "내용", 180);
+    const missionDone = addSuccess(missionGroup, "missionDone", "미션 성공", [missionNameInput, missionInput]);
+    row.append(missionGroup);
     editor.append(row);
-    editorRows.push({ inputs, done, missionDone });
+    editorRows.push({ inputs, done, missionDone, balloons: { output: balloonOutput, minus, plus } });
     tile.addEventListener("click", () => labelInput.focus());
   });
   draw();

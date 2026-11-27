@@ -10,15 +10,14 @@
 }
 .bingo-header, .bingo-panel-heading, .bingo-actions { display: flex; align-items: center; gap: 10px; }
 .bingo-header, .bingo-panel-heading { justify-content: space-between; }
-.bingo-header { flex-wrap: wrap; }
-.bingo-home { color: #78531c; font-size: 13px; font-weight: 700; text-decoration: none; }
-.bingo-home:hover { text-decoration: underline; }
+.bingo-header { justify-content: flex-end; flex-wrap: wrap; }
 .bingo-actions { flex-wrap: wrap; }
 .bingo-button { min-height: 35px; padding: 5px 12px; border: 1px solid #c9bdad; border-radius: 4px; background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 750; cursor: pointer; }
 .bingo-button:hover:not(:disabled) { background: #eee5d4; }
 .bingo-button:disabled { opacity: .48; cursor: default; }
 .bingo-button--accent { background: #e5b56a; color: #24190f; border-color: #e5b56a; }
 .bingo-button--accent:hover:not(:disabled) { background: #f3d298; }
+.bingo-new-board { min-height: 44px; padding-inline: 18px; font-size: 16px; }
 .bingo-status { min-height: 23px; margin: 8px 0; color: var(--muted); font-size: 13px; }
 .bingo-workspace { display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.32fr); align-items: start; gap: 16px; }
 .bingo-board-column { display: grid; gap: 10px; min-width: 0; }
@@ -56,10 +55,9 @@
 .bingo-cell__label { grid-row: 2; overflow: hidden; overflow-wrap: anywhere; max-width: 100%; max-height: 100%; line-height: 1.05; font-size: clamp(9px, calc(var(--label-scale, 50) * .78cqw), 52px); font-weight: 850; }
 .bingo-cell--empty .bingo-cell__label { color: #788187; }
 .bingo-cell--mission { border-color: #b08037; box-shadow: inset 0 0 0 1px #b0803730; }
-.bingo-cell__mission { grid-row: 1; justify-self: end; padding: 1px 3px; border-radius: 3px; background: #f3dfb8; color: #704a14; font-size: clamp(7px, 16cqw, 13px); font-weight: 850; line-height: 1; }
-.bingo-cell--mission-done .bingo-cell__mission { background: #dcecdf; color: #255b3b; }
 .bingo-cell__stamp {
   grid-row: 3;
+  margin: 1px 2px 2px;
   padding: 0 3px;
   border: 1px solid currentColor;
   border-radius: 3px;
@@ -69,19 +67,38 @@
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
+  transform: rotate(-6deg);
   pointer-events: none;
 }
+.bingo-cell__stamp.bingo-cell__mission { grid-row: 1; justify-self: end; margin: 2px 2px 1px; color: #805315; background: #f8ecd0; }
+.bingo-cell--mission-done .bingo-cell__mission { color: #255b3b; background: #e7f3e9; }
 .bingo-cell--line { background: #f8e4b4; border-color: #ab7b28; box-shadow: inset 0 0 0 1px #ab7b28; }
 .bingo-cell--line .bingo-cell__label { color: #4d3312; }
 .bingo-line-layer { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
 .bingo-line { position: absolute; height: 4px; border-radius: 5px; translate: 0 -50%; transform-origin: left center; background: #ad5e0ba8; box-shadow: 0 0 0 1px #ffdb9c; }
 .bingo-editor { container-type: inline-size; display: grid; gap: 7px; max-height: var(--bingo-available); overflow: auto; padding: 2px; }
-.bingo-editor-row { display: grid; grid-template-columns: 2ch minmax(74px, .65fr) minmax(62px, .7fr) minmax(64px, .6fr) minmax(90px, 1.35fr) max-content; align-items: end; gap: 6px; padding: 8px; background: #f4f1ea; border: 1px solid var(--line); border-radius: 4px; }
+.bingo-editor-row { display: grid; grid-template-columns: 2ch minmax(0, 1fr) max-content; align-items: end; gap: 6px; padding: 8px; background: #f4f1ea; border: 1px solid var(--line); border-radius: 4px; }
 .bingo-editor-row > span { align-self: center; color: var(--muted); font-size: 12px; text-align: center; }
-.bingo-editor-row label { display: grid; gap: 4px; min-width: 0; color: #515c63; font-size: 11px; font-weight: 650; }
+.bingo-editor-row label, .bingo-balloon-field { display: grid; gap: 4px; min-width: 0; color: #515c63; font-size: 11px; font-weight: 650; }
 .bingo-editor-row input, .bingo-size { width: 100%; min-width: 0; height: 34px; padding: 4px 7px; color: var(--ink); background: var(--surface); border: 1px solid #bfb8ab; border-radius: 3px; font: inherit; }
-.bingo-editor-actions { display: flex; gap: 4px; }
-.bingo-editor-actions .bingo-button { min-height: 34px; padding-inline: 5px; font-size: 11px; white-space: nowrap; }
+.bingo-editor-row .bingo-button { min-height: 34px; padding-inline: 7px; font-size: 11px; white-space: nowrap; }
+.bingo-mission-group {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, .8fr) minmax(116px, 1fr) minmax(0, 1.5fr) max-content;
+  align-items: end;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 5px 7px 7px;
+  border: 1px solid #d5c19d;
+  border-radius: 4px;
+  background: #fffaf0;
+}
+.bingo-mission-group legend { padding-inline: 3px; color: #78531c; font-size: 11px; font-weight: 800; }
+.bingo-balloon-controls { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 3px; }
+.bingo-balloon-controls .bingo-button { padding-inline: 4px; }
+.bingo-balloon-controls output { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; font-variant-numeric: tabular-nums; }
 .bingo-button--done[aria-pressed="true"] { color: #8c2d24; border-color: #c97a71; background: #f9dfd9; }
 .bingo-button--missionDone[aria-pressed="true"] { color: #69470f; border-color: #b08037; background: #faeac5; }
 .bingo-dialog { width: min(390px, calc(100% - 32px)); padding: 22px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); }
@@ -92,10 +109,10 @@
   .bingo-workspace { grid-template-columns: minmax(0, 1fr); }
   .bingo-editor { max-height: none; }
 }
-@container (max-width: 470px) {
-  .bingo-editor-row { grid-template-columns: 2ch repeat(3, minmax(0, 1fr)); padding: 6px; }
-  .bingo-editor-row [data-field="mission"] { grid-column: 2 / -1; }
-  .bingo-editor-actions { grid-column: 2 / -1; justify-content: flex-end; }
+@container (max-width: 460px) {
+  .bingo-editor-row { padding: 6px; }
+  .bingo-mission-group { grid-template-columns: minmax(0, 1fr) minmax(116px, 1fr); }
+  .bingo-mission-group .bingo-button--missionDone { justify-self: end; }
 }
 @media (max-width: 430px) {
   .bingo-shell { width: calc(100% - 20px); padding-block: 14px; }

@@ -35,7 +35,6 @@ const memoFontLarger = document.querySelector("#memoFontLarger");
 const memoFontSize = document.querySelector("#memoFontSize");
 const memoSymbolToggle = document.querySelector("#memoSymbolToggle");
 const memoSymbolPalette = document.querySelector("#memoSymbolPalette");
-const memoCloseButton = document.querySelector("#memoCloseButton");
 
 let preferences = readPreferences();
 let isMemoComposing = false;
@@ -211,14 +210,6 @@ memoClearButton.addEventListener("click", () => {
   memoEditor.value = "";
   saveMemo();
   memoEditor.focus();
-});
-
-memoCloseButton.addEventListener("click", (event) => {
-  event.preventDefault();
-  window.close();
-  window.setTimeout(() => {
-    if (!window.closed) window.location.href = memoCloseButton.href;
-  }, 120);
 });
 
 applyPreferences();
