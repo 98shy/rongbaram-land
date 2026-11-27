@@ -55,10 +55,32 @@ button { color: inherit; }
 }
 .category-card--pubg { background: linear-gradient(155deg, #6c4c27, #261e17 65%); }
 .category-card--land {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #102338;
+}
+.category-card--land::before,
+.category-card--land::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.category-card--land::before {
+  inset: 0 auto 0 min(-96%, -525px);
+  z-index: -2;
+  width: max(210%, 1150px);
   background:
-    linear-gradient(180deg, #10233855, #102338 82%),
-    url("assets/hero-aram-land-v3.jpg") right center / max(210%, 1150px) auto no-repeat,
-    #102338;
+    linear-gradient(180deg, #10233855, #102338ad 90%),
+    url("assets/hero-aram-land-v3.jpg") left bottom / 100% auto no-repeat;
+}
+.category-card--land::after {
+  inset: 0 auto 48px 0;
+  z-index: -1;
+  width: 78px;
+  background: #102338;
+  mask-image: linear-gradient(to right, #000 55px, transparent), linear-gradient(#000 calc(100% - 17px), transparent);
+  mask-composite: intersect;
 }
 .category-card--tools { background: linear-gradient(180deg, #132a2366, #132a23 85%), url("assets/memo-forest-background-v2.jpg") center / cover; }
 .category-card h2 { margin: 0; font-size: clamp(22px, 3vw, 32px); line-height: 1.2; letter-spacing: -.04em; }
