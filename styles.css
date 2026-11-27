@@ -136,19 +136,17 @@ button { color: inherit; }
 .suweet-profile__stats small { margin-left: 3px; color: var(--muted); font-size: 12px; }
 .suweet-profile__footer {
   grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px 16px;
   padding-top: 16px;
   border-top: 1px solid var(--line);
 }
-.suweet-profile__footer a { display: flex; align-items: center; gap: 7px; min-height: 38px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 700; }
+.category-home__contact { display: flex; justify-content: flex-end; margin-top: 12px; }
+.suweet-profile__footer a,
+.category-home__contact a { display: flex; align-items: center; gap: 7px; min-height: 38px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 700; }
 .suweet-profile__footer a:hover { border-color: var(--gold); }
-.suweet-profile__footer .suweet-profile__contact { border-color: #cecff5; background: #f2f2ff; color: #333e93; }
-.suweet-profile__footer .suweet-profile__contact:hover { border-color: #5865f2; }
-.suweet-profile a:focus-visible { outline: 2px solid #3262ae; outline-offset: 3px; }
+.category-home__contact a { border-color: #cecff5; background: #f2f2ff; color: #333e93; }
+.category-home__contact a:hover { border-color: #5865f2; }
+.suweet-profile a:focus-visible,
+.category-home__contact a:focus-visible { outline: 2px solid #3262ae; outline-offset: 3px; }
 .suweet-profile__icon { display: inline-grid; place-items: center; position: relative; width: 19px; height: 19px; }
 .suweet-profile__icon--discord { flex: none; color: #5865f2; }
 .suweet-profile__icon--instagram { border-radius: 5px; background: linear-gradient(145deg, #783abe, #d62869 50%, #b04913); color: #fff; }
