@@ -58,6 +58,8 @@
 .bingo-cell__stamp {
   --stamp-outline: #73231e;
   --stamp-hue: -48deg;
+  --stamp-saturation: 4;
+  --stamp-ink-brightness: 1;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -83,17 +85,30 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transform: scale(1.26);
+  transform-origin: 68% 15%;
   filter:
-    grayscale(1) brightness(.64) sepia(1) saturate(5) hue-rotate(var(--stamp-hue))
+    grayscale(1) brightness(.60) sepia(1) saturate(var(--stamp-saturation)) hue-rotate(var(--stamp-hue)) contrast(1.16) brightness(var(--stamp-ink-brightness))
     drop-shadow(1px 0 var(--stamp-outline))
     drop-shadow(-1px 0 var(--stamp-outline))
     drop-shadow(0 1px var(--stamp-outline))
     drop-shadow(0 -1px var(--stamp-outline));
+  mask:
+    radial-gradient(circle at 1px 1px, #0005 0 .38px, #000 .72px) 0 0 / 3px 5px,
+    radial-gradient(circle at 2px 1px, #0007 0 .33px, #000 .68px) 0 0 / 5px 7px;
+  mask-composite: intersect;
 }
-.bingo-cell__stamp span { paint-order: stroke fill; -webkit-text-stroke: 2px #fffaf2; }
-.bingo-cell--mission-done .bingo-cell__mission { --stamp-outline: #17482c; --stamp-hue: 83deg; color: #205b39; }
+.bingo-cell__stamp span { paint-order: stroke fill; -webkit-text-stroke: 1.4px #fffaf2; }
+.bingo-cell--mission-done .bingo-cell__mission {
+  --stamp-outline: #17482c;
+  --stamp-hue: 83deg;
+  --stamp-saturation: 2.9;
+  --stamp-ink-brightness: .79;
+  color: #205b39;
+}
 @container (max-width: 42px) {
   .bingo-cell__stamp { margin: 0; font-size: max(6px, 17cqw); transform: none; }
+  .bingo-cell__stamp img { transform: scale(1.12); }
 }
 .bingo-cell--done, .bingo-cell--line { background: #f8e4b4; border-color: #ab7b28; box-shadow: inset 0 0 0 1px #ab7b28; }
 .bingo-cell--done .bingo-cell__label, .bingo-cell--line .bingo-cell__label { color: #4d3312; }
