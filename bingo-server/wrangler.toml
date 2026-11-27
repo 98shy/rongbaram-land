@@ -1,0 +1,14 @@
+name = "tool-bingo-rooms"
+main = "worker.js"
+compatibility_date = "2026-11-26"
+
+[vars]
+SITE_ORIGIN = "https://98shy.github.io"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "BingoRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BingoRoom"]
