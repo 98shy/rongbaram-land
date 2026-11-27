@@ -16,9 +16,13 @@ async function loadSoopStats() {
       notation: "compact",
       maximumFractionDigits: 1,
     });
-    document.getElementById("suweet-favorites").textContent = compactFormat.format(favorites);
-    document.getElementById("suweet-subscriptions").textContent = numberFormat.format(subscriptions);
-    document.getElementById("suweet-stats-source").textContent = "SOOP · 페이지를 열 때 갱신";
+    const favoritesCount = document.getElementById("suweet-favorites");
+    favoritesCount.textContent = compactFormat.format(favorites);
+    favoritesCount.removeAttribute("title");
+
+    const subscriptionsCount = document.getElementById("suweet-subscriptions");
+    subscriptionsCount.textContent = numberFormat.format(subscriptions);
+    subscriptionsCount.removeAttribute("title");
   } catch {
     // Keep the dated snapshot when SOOP is unavailable.
   }
